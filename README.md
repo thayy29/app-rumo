@@ -6,7 +6,7 @@ Planejamento completo em [`docs/planejamento`](docs/planejamento): PRD v2, arqui
 
 ## Stack
 
-Expo SDK 57 (React Native 0.86) · TypeScript estrito · expo-router · SQLite (expo-sqlite) + Drizzle ORM · notificações locais (expo-notifications) · Jest. Tudo roda no **Expo Go**, sem conta paga da Apple.
+Expo SDK 58 (React Native 0.88) · TypeScript estrito · expo-router · SQLite (expo-sqlite) + Drizzle ORM · notificações locais (expo-notifications) · Jest. Tudo roda no **Expo Go**, sem conta paga da Apple.
 
 ## Como rodar
 
@@ -26,7 +26,7 @@ npx expo start
 
 Escaneie o QR code com a **câmera do iPhone**. O computador e o iPhone precisam estar no mesmo Wi-Fi. Se a sua rede bloquear, use `npx expo start --tunnel`.
 
-> **"Project is incompatible with this version of Expo Go"?** O Expo Go da loja foi atualizado para o SDK 58. Rode `npx expo install expo@^58.0.0 --fix` e tente de novo.
+> **"Project is incompatible with this version of Expo Go"?** O projeto e o Expo Go precisam estar no mesmo SDK (hoje, 58). Atualize o Expo Go na App Store; se a loja já estiver numa versão mais nova, rode `npx expo install expo@latest --fix`.
 
 ### Conferir o código
 
