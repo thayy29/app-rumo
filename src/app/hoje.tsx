@@ -5,7 +5,7 @@ import { Alert, Text, View } from 'react-native';
 
 import { db, schema } from '@/data/db';
 import { porcentagem } from '@/domain/sumario';
-import { apagarEstudo, consultaTopicos } from '@/features/comecar';
+import { apagarEstudo, consultaTopicos, lerDetalhes } from '@/features/comecar';
 import { Barra, Botao, Cartao, Destaque, Fala, Tela } from '@/ui/componentes';
 import { tipo } from '@/ui/tokens';
 import { useCores } from '@/ui/useCores';
@@ -24,6 +24,7 @@ export default function Hoje() {
   const proximo = topicos.find((t) => t.feitoEm === null);
   const doGrupo = proximo ? topicos.filter((t) => t.grupoId === proximo.grupoId) : [];
   const posicao = proximo ? doGrupo.findIndex((t) => t.id === proximo.id) + 1 : 0;
+  const oQueEstudar = lerDetalhes(proximo?.detalhes ?? null);
 
   function trocar() {
     Alert.alert('Trocar de estudo?', 'O estudo atual e o progresso dele serão apagados deste iPhone.', [
@@ -52,6 +53,17 @@ export default function Hoje() {
               {proximo.grupo} · tópico {posicao} de {doGrupo.length}
             </Text>
             <Text style={[tipo.titulo1, { color: c.texto, textAlign: 'center' }]}>{proximo.texto}</Text>
+            {oQueEstudar.length > 0 ? (
+              <View style={{ alignSelf: 'stretch', gap: 6 }} accessible accessibilityLabel={`O que estudar: ${oQueEstudar.join('. ')}`}>
+                <Text style={[tipo.nota, { color: c.apoio, fontWeight: '600' }]}>O que estudar</Text>
+                {oQueEstudar.map((d) => (
+                  <View key={d} style={{ flexDirection: 'row', gap: 8 }}>
+                    <Text style={[tipo.subtitulo, { color: c.destaqueTinta }]}>•</Text>
+                    <Text style={[tipo.subtitulo, { color: c.texto, flex: 1 }]}>{d}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
             <View style={{ alignSelf: 'stretch', gap: 8 }}>
               <Barra porcento={pct} />
               <Text style={[tipo.subtitulo, { color: c.apoio, textAlign: 'center' }]}>

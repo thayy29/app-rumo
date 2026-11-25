@@ -1,7 +1,7 @@
 # System Architecture: Rumo
 
-**Document Version:** 1.0
-**Date:** 13/11/2026
+**Document Version:** 1.1
+**Date:** 13/11/2026 · atualizado em 25/11/2026 (ADR-014, ADR-015; ADR-003 e ADR-009 parcialmente substituídas)
 **Author:** Winston (Architect) · redigido com Claude para Thayana
 **Track:** Quick Flow (arquitetura enxuta, sem backend)
 **Status:** Draft
@@ -92,17 +92,19 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 |-----|-------|--------|--------|
 | ADR-001 | Expo + React Native + TypeScript estrito, só bibliotecas do Expo Go | Accepted | NFR-009, NFR-001 |
 | ADR-002 | SQLite local com Drizzle ORM, gravação antes do retorno visual | Accepted | NFR-004, FR-001…017 |
-| ADR-003 | Sem autenticação e sem rede na v1 | Accepted | NFR-005 |
+| ADR-003 | Sem autenticação e sem rede na v1 | Accepted (rede: ver ADR-014) | NFR-005 |
 | ADR-004 | Estado: banco como verdade, consultas reativas, Zustand só para UI efêmera | Accepted | NFR-002, NFR-004 |
 | ADR-005 | Regras em domínio puro; erros como `Result`, sem exceções entre camadas | Accepted | FR-005, FR-009, FR-011, FR-012 |
 | ADR-006 | Convenções de nome e de datas | Accepted | todos |
 | ADR-007 | Navegação com expo-router: pilha única e sheets nativas | Accepted | FR-004, FR-013, NFR-007 |
 | ADR-008 | Tempo por carimbos; dia vira às 4h; notificações locais com orçamento | Accepted | FR-006, FR-010, FR-011, NFR-003 |
-| ADR-009 | Receitas de caminho como dados validados | Accepted | FR-002, NFR-008 |
+| ADR-009 | Receitas de caminho como dados validados | Superseded by ADR-015 | FR-002, NFR-008 |
 | ADR-010 | UI: tokens próprios, StyleSheet, Reanimated, componentes nativos do iOS | Accepted | NFR-002, NFR-006 |
 | ADR-011 | Distribuição: Expo Go primeiro, com porta de decisão antes das testadoras | Accepted | NFR-009 |
 | ADR-012 | Métricas por registro local de eventos, exportado pela pessoa | Accepted | Success Metrics, NFR-005 |
 | ADR-013 | Qualidade e cadeia de dependências | Accepted | NFR-004, segurança |
+| ADR-014 | Importar o guia de certificação Microsoft pelo link (única saída de rede) | Accepted | FR-002, NFR-005, NFR-007 |
+| ADR-015 | Importador de sumário colado com regras testáveis (substitui receitas) | Accepted | FR-002, FR-018, NFR-008 |
 
 ### ADR-001: Expo + React Native + TypeScript estrito, só bibliotecas do Expo Go
 
@@ -343,6 +345,34 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 
 **Revisit when:** antes da App Store (avaliar Maestro).
 
+### ADR-014: Importar o guia de certificação Microsoft pelo link (única saída de rede)
+
+**Status:** Accepted (25/11/2026)   **Drives:** FR-002, NFR-005, NFR-007   **Altera:** ADR-003 (rede)
+
+**Context:** Colar o sumário inteiro de uma página no celular é trabalhoso; ao copiar a página toda, parágrafos e avisos viravam tópicos (teste da dona com o guia da AI-103). Os guias de estudo de certificação Microsoft seguem a mesma estrutura: seção "Skills measured" / "Habilidades medidas" (h2), áreas com peso na prova (h3), subtemas (h4) e objetivos em lista. A API pública de catálogo da Microsoft começou a ser desativada em junho de 2026 e a nova exige autenticação, o que pediria um servidor.
+
+**Decision:**
+- A pessoa cola o link do guia de estudo (ou da página do exame, que é trocada pelo guia). O app baixa a página com um `fetch` GET, sem cookies nem dados da pessoa, e a lê no aparelho, sem IA e sem servidor.
+- Só `learn.microsoft.com` é aceito; outros sites recebem a orientação de colar o texto.
+- Áreas viram módulos; **subtemas viram tópicos** (escolha da dona: cerca de 18 tópicos na AI-103, cada um em 1 ou 2 blocos); os objetivos ficam como "o que estudar" do tópico (coluna `topico.detalhes`, JSON).
+- O leitor é uma função pura em `src/domain/guiaMicrosoft.ts`, testada com uma réplica da página; o download fica em `src/platform/rede.ts`.
+
+**Consequences — TRAVADO:** `platform/rede.ts` é a única porta de rede; nenhuma outra chamada de rede entra sem nova ADR. NFR-005 passa a ser "nenhum dado da pessoa sai do aparelho; a única requisição é a página que ela colou".
+- Mais fácil: começar uma certificação Microsoft em 2 toques.
+- Custo aceito: se a Microsoft mudar o HTML do guia, o leitor pode falhar. Mitigação: mensagem clara e o colar texto como alternativa sempre visível.
+
+**Alternatives:** IA lendo qualquer link (servidor e custo; adiada pela dona); API de catálogo (desativada/autenticada).
+
+**Revisit when:** a importação falhar em guias reais, ou quando entrar IA para outros sites.
+
+### ADR-015: Importador de sumário colado com regras testáveis (substitui receitas)
+
+**Status:** Accepted (25/11/2026)   **Supersedes:** ADR-009   **Drives:** FR-002, FR-018, NFR-008
+
+**Decision:** o texto colado passa por `importarSumario` em `src/domain/sumario.ts`: remove numeração e durações; linhas de módulo (Módulo, Seção, Capítulo, Unidade, Domínio) ou com peso na prova "(25–30%)" viram grupos; ao colar uma página inteira de guia, lê só a seção de habilidades; descarta avisos ("Observação", "Nota") e texto corrido (frases longas terminadas em ponto ou mais de 140 caracteres); limite de 300 linhas. Cada regra tem teste com o caso real que a motivou.
+
+**Consequences — TRAVADO:** nenhuma regra de importação fica em tela; mudança de regra entra com teste.
+
 ---
 
 ## 4. Component Design
@@ -529,10 +559,10 @@ src/receitas (JSON) ← usado por domain/comecar
 | NFR-002 | NFR | Toque ≤ 100 ms, < 5% quadros perdidos | ui (Reanimated na thread de UI), features (≤ 16 ms) | ADR-004, ADR-010 | Addressed |
 | NFR-003 | NFR | Timer ±1 s, aviso ≤ 5 s | domain (carimbos), platform/notificacoes | ADR-008 | Addressed |
 | NFR-004 | NFR | 0 ações perdidas | features (transação antes do retorno), data (WAL) | ADR-002, ADR-005 | Addressed |
-| NFR-005 | NFR | 0 requisições de rede | sem cliente HTTP, sem SDK de terceiros | ADR-003, ADR-012, ADR-013 | Addressed |
+| NFR-005 | NFR | Nenhum dado da pessoa sai do aparelho; só a página do guia que ela colou é baixada | platform/rede.ts (única porta), sem SDK de terceiros | ADR-003, ADR-012, ADR-013, ADR-014 | Addressed |
 | NFR-006 | NFR | Acessibilidade WCAG AA, VoiceOver, AX3 | ui, sheets nativas | ADR-007, ADR-010 | Addressed |
 | NFR-007 | NFR | ≤ 90 s até o primeiro bloco; ≤ 2 toques | app (rotas), ADR de navegação | ADR-007 | Addressed |
-| NFR-008 | NFR | Receitas como dados | src/receitas + Zod | ADR-009 | Addressed |
+| NFR-008 | NFR | Importação tolerante (sumário colado e guia Microsoft) | src/domain/sumario.ts, src/domain/guiaMicrosoft.ts | ADR-014, ADR-015 | Addressed |
 | NFR-009 | NFR | R$ 0 na validação | Expo Go, EAS Update gratuito | ADR-001, ADR-011 | Partial — depende do spike da opção A |
 
 ### Cobertura por categoria de NFR

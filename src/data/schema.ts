@@ -25,6 +25,8 @@ export const topico = sqliteTable('topico', {
     .references(() => grupo.id, { onDelete: 'cascade' }),
   ordem: integer('ordem').notNull(),
   texto: text('texto').notNull(),
+  // "O que estudar": objetivos do guia de certificação, em JSON (lista de textos).
+  detalhes: text('detalhes'),
   feitoEm: integer('feito_em'),
 });
 

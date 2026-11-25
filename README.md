@@ -50,9 +50,10 @@ npx expo lint       # lint
 
 1. Abra o app: aparece o **Início** com o mascote e o "rumo.".
 2. **Começar** → escolha o tipo e dê um nome.
-3. **Cole o sumário** de um curso seu. O cartão embaixo mostra "N tópicos em M módulos" enquanto você cola.
+3. **Certificação Microsoft:** cole o link do guia de estudo, por exemplo `https://learn.microsoft.com/pt-br/credentials/certifications/resources/study-guides/ai-103`, e toque em **Ler o guia**. As áreas da prova viram módulos e os subtemas viram tópicos. O link da página do exame também funciona.
+   **Outro curso:** toque em "Não é Microsoft · colar o sumário" e cole o texto. Avisos e parágrafos ficam de fora; o cartão diz quantas linhas foram ignoradas.
 4. **Toque no último tópico que você fez**: ele e os anteriores ficam marcados e aparece a porcentagem. Tocar de novo no "último feito" desmarca ele.
-5. **Ir para o Hoje**: mostra o próximo tópico e a porcentagem (versão provisória; os estados do canvas chegam na semana 3).
+5. **Ir para o Hoje**: mostra o próximo tópico, o "o que estudar" (quando veio do guia) e a porcentagem (versão provisória; os estados do canvas chegam na semana 3).
 6. Feche o app à força e abra de novo: ele volta direto no Hoje. "Trocar de estudo" apaga e volta ao Início.
 
 Teste também com o iPhone no **modo escuro** e com o **texto grande** (Ajustes > Acessibilidade > Tela e Tamanho do Texto).

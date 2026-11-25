@@ -57,3 +57,10 @@ Registro só de acréscimo. Cada entrada: data, decisão, motivo, origem.
 - **Login da Expo:** a conta precisa estar com e-mail verificado ou com senha; o login por código de e-mail não funciona antes da verificação. Origem: dona.
 - **Repositório:** github.com/thayy29/app-rumo, branch `spike/semana-1`. Origem: dona.
 - **v0.1 sai grátis, sem tela de compra.** Usuárias reais antes de cobrar; a compra única entra numa versão seguinte. Escopo da v0.1: Começar (estudo + sumário), Até onde você foi, Hoje, Foco com fechamento, Progresso. Origem: dona (24/11).
+
+## 25/11/2026 — Importação pelo link e correções da semana 2
+
+- **Importar pelo link do guia de certificação Microsoft (ADR-014).** O app baixa a página do guia que a pessoa colou e lê áreas e subtemas no aparelho, sem IA e sem servidor. Única saída de rede do app; nenhum dado da pessoa é enviado. Motivo: colar o sumário inteiro no celular é trabalhoso (caso real da AI-103). Origem: dona (ideia e escolha da opção A).
+- **Subtemas viram tópicos; objetivos viram "o que estudar".** AI-103: 5 módulos e cerca de 18 tópicos, em vez de cerca de 64 itens. Origem: dona.
+- **Colar texto fica mais tolerante (ADR-015, substitui ADR-009).** Ao colar a página inteira de um guia, lê só "Habilidades medidas"; descarta "Observação" e parágrafos; peso na prova "(25–30%)" vira módulo. Motivo: no teste, a introdução da página virou tópicos. Origem: teste da dona.
+- **Teclado:** o conteúdo das telas passa a rolar acima do botão; o botão não cobre mais o campo. Origem: teste da dona.
