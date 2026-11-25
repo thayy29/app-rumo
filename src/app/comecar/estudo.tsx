@@ -1,6 +1,7 @@
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { router } from 'expo-router';
-import { KeyboardAvoidingView, Pressable, Text, TextInput, View } from 'react-native';
+import { type ComponentRef, useRef } from 'react';
+import { Pressable, type ScrollView, Text, TextInput, View } from 'react-native';
 
 import { useRascunho, type TipoEstudo } from '@/state/rascunho';
 import { Botao, Destaque, Etapas, Fala, Icone, Rotulo, Tela } from '@/ui/componentes';
@@ -20,10 +21,10 @@ export default function ComecarEstudo() {
   const { tipo: escolhido, nome, definir } = useRascunho();
   const atual = TIPOS.find((t) => t.id === escolhido) ?? TIPOS[0]!;
   const valido = nome.trim().length > 0;
+  const rolagem = useRef<ComponentRef<typeof ScrollView>>(null);
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-      <Tela rodape={<Botao desabilitado={!valido} onPress={() => router.push('/comecar/sumario')}>Continuar</Botao>}>
+    <Tela refRolagem={rolagem} rodape={<Botao desabilitado={!valido} onPress={() => router.push('/comecar/sumario')}>Continuar</Botao>}>
         <Etapas atual={1} total={3} />
         <Fala>
           Qual estudo <Destaque>ficou pela metade</Destaque>?
@@ -73,11 +74,11 @@ export default function ComecarEstudo() {
             maxLength={60}
             returnKeyType="next"
             onSubmitEditing={() => valido && router.push('/comecar/sumario')}
+            onFocus={() => setTimeout(() => rolagem.current?.scrollToEnd({ animated: true }), 250)}
             accessibilityLabel="Nome do estudo"
             style={[tipo.corpo, { height: 52, borderRadius: raio.celula, backgroundColor: c.celula, color: c.texto, paddingHorizontal: 16 }]}
           />
         </View>
-      </Tela>
-    </KeyboardAvoidingView>
+    </Tela>
   );
 }

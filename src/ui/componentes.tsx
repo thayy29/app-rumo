@@ -1,7 +1,7 @@
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { router } from 'expo-router';
-import { type ReactNode, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { type ComponentRef, type ReactNode, type Ref, useMemo } from 'react';
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Mascote, type Expressao } from './Mascote';
@@ -15,18 +15,44 @@ function useEstilos() {
 
 // ---------- estrutura da tela ----------
 
-export function Tela({ children, rodape }: { children: ReactNode; rodape?: ReactNode }) {
+// O conteúdo rola acima do rodapé. Com o teclado aberto, a tela encolhe (KeyboardAvoidingView)
+// e o conteúdo continua acessível em vez de ficar escondido atrás do botão.
+export function Tela({
+  children,
+  rodape,
+  rolar = true,
+  refRolagem,
+}: {
+  children: ReactNode;
+  rodape?: ReactNode;
+  rolar?: boolean;
+  refRolagem?: Ref<ComponentRef<typeof ScrollView>>;
+}) {
   const { c } = useEstilos();
   const insets = useSafeAreaInsets();
+  const conteudo = { paddingHorizontal: espaco.xl, gap: espaco.l };
   return (
-    <View style={{ flex: 1, backgroundColor: c.fundo, paddingTop: insets.top + espaco.s }}>
-      <View style={{ flex: 1, paddingHorizontal: espaco.xl, gap: espaco.l }}>{children}</View>
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: c.fundo, paddingTop: insets.top + espaco.s }}>
+      {rolar ? (
+        <ScrollView
+          ref={refRolagem}
+          style={{ flex: 1 }}
+          contentContainerStyle={[conteudo, { flexGrow: 1, paddingBottom: espaco.l }]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
+      ) : (
+        <View style={[conteudo, { flex: 1 }]}>{children}</View>
+      )}
       {rodape ? (
         <View style={{ paddingHorizontal: espaco.xl, paddingTop: espaco.m, paddingBottom: Math.max(insets.bottom, espaco.l), gap: espaco.s }}>
           {rodape}
         </View>
       ) : null}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

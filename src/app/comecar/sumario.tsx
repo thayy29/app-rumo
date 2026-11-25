@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { type ComponentRef, useMemo, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { importarSumario, resumo } from '@/domain/sumario';
 import { salvarEstudo } from '@/features/comecar';
@@ -26,8 +26,7 @@ export default function ComecarSumario() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-      <Tela rodape={<Botao desabilitado={!temTopicos} onPress={continuar}>Continuar</Botao>}>
+    <Tela rodape={<Botao desabilitado={!temTopicos} onPress={continuar}>Continuar</Botao>}>
         <Etapas atual={2} total={3} />
         <Fala>
           {digitando ? (
@@ -41,7 +40,7 @@ export default function ComecarSumario() {
           )}
         </Fala>
 
-        <View style={{ flex: 1, gap: 12, minHeight: 160 }}>
+        <View style={{ gap: 12 }}>
           <Rotulo>{digitando ? 'Tópicos' : 'Sumário'}</Rotulo>
           <TextInput
             ref={campo}
@@ -51,7 +50,7 @@ export default function ComecarSumario() {
             placeholder={digitando ? 'Introdução\nVariáveis e tipos\nFunções' : 'Cole aqui o sumário do curso ou o guia da prova'}
             placeholderTextColor={c.apoio}
             accessibilityLabel={digitando ? 'Tópicos, um por linha' : 'Sumário colado'}
-            style={[tipo.corpo, { flex: 1, borderRadius: raio.celula, backgroundColor: c.celula, color: c.texto, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 14, textAlignVertical: 'top' }]}
+            style={[tipo.corpo, { height: 220, borderRadius: raio.celula, backgroundColor: c.celula, color: c.texto, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 14, textAlignVertical: 'top' }]}
           />
         </View>
 
@@ -76,7 +75,6 @@ export default function ComecarSumario() {
             {digitando ? 'Tenho o sumário · colar' : 'Não tenho o sumário · digitar os tópicos'}
           </Botao>
         )}
-      </Tela>
-    </KeyboardAvoidingView>
+    </Tela>
   );
 }

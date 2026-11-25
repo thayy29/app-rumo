@@ -44,6 +44,7 @@ export default function AteOnde() {
 
   return (
     <Tela
+      rolar={false}
       rodape={
         <>
           <Cartao estilo={{ alignItems: 'center', gap: 4, paddingVertical: 14 }}>
