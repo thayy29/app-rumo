@@ -16,7 +16,7 @@ export default function RootLayout() {
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: c.fundo }}>
-        <Text style={{ color: c.alerta, fontSize: 17 }}>Erro ao preparar o banco: {error.message}</Text>
+        <Text style={{ color: c.alerta, fontSize: 17 }}>Algo saiu do lugar ao preparar seus dados: {error.message}</Text>
       </View>
     );
   }
@@ -28,20 +28,17 @@ export default function RootLayout() {
     );
   }
 
+  // Pilha única, sem abas (ADR-007).
   return (
     <>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ contentStyle: { backgroundColor: c.fundo }, headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen
-          name="sheet"
-          options={{
-            presentation: 'formSheet',
-            sheetAllowedDetents: [0.5, 1],
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 40,
-          }}
-        />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.fundo } }}>
+        <Stack.Screen name="index" options={{ animation: 'none' }} />
+        <Stack.Screen name="inicio" options={{ animation: 'fade' }} />
+        <Stack.Screen name="comecar/estudo" />
+        <Stack.Screen name="comecar/sumario" />
+        <Stack.Screen name="comecar/ate-onde" />
+        <Stack.Screen name="hoje" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
     </>
   );

@@ -49,3 +49,11 @@ Registro só de acréscimo. Cada entrada: data, decisão, motivo, origem.
 - **Compra dentro do app só depois da validação de uso.** Compras da Apple exigem conta paga e build próprio; a intenção de compra é medida por pré-venda fora do app. Origem: PM.
 - **Telas v2 publicadas no mesmo canvas** (32 pranchetas): Começar ganha uma terceira etapa e o Progresso substitui o Caminho; nova sheet "Rumo completo". Origem: PM/UX.
 - **Arquitetura precisa de atualização:** ADR-009 substituída por importador de sumário; nova ADR de compra única. Pendente. Origem: PM.
+
+## 25/11/2026 — Spike da semana 1 concluído
+
+- **Os 5 testes passaram no iPhone da dona** (banco local sobrevive a fechar à força, importador de sumário, timer por carimbos com aviso de fim, notificações locais com o app fechado, sheet nativa). Base técnica confirmada no Expo Go. Origem: dona.
+- **Projeto no Expo SDK 58** (React Native 0.88): o Expo Go da App Store já está no 58 e recusou o projeto no 57. Origem: teste da dona.
+- **Login da Expo:** a conta precisa estar com e-mail verificado ou com senha; o login por código de e-mail não funciona antes da verificação. Origem: dona.
+- **Repositório:** github.com/thayy29/app-rumo, branch `spike/semana-1`. Origem: dona.
+- **v0.1 sai grátis, sem tela de compra.** Usuárias reais antes de cobrar; a compra única entra numa versão seguinte. Escopo da v0.1: Começar (estudo + sumário), Até onde você foi, Hoje, Foco com fechamento, Progresso. Origem: dona (24/11).
