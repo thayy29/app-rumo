@@ -103,7 +103,7 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 | ADR-011 | Distribuição: Expo Go primeiro, com porta de decisão antes das testadoras | Accepted | NFR-009 |
 | ADR-012 | Métricas por registro local de eventos, exportado pela pessoa | Accepted | Success Metrics, NFR-005 |
 | ADR-013 | Qualidade e cadeia de dependências | Accepted | NFR-004, segurança |
-| ADR-014 | Importar o guia de certificação Microsoft pelo link (única saída de rede) | Accepted | FR-002, NFR-005, NFR-007 |
+| ADR-014 | Importar o sumário pelo link do curso, de qualquer site (única saída de rede) | Accepted | FR-002, NFR-005, NFR-007 |
 | ADR-015 | Importador de sumário colado com regras testáveis (substitui receitas) | Accepted | FR-002, FR-018, NFR-008 |
 
 ### ADR-001: Expo + React Native + TypeScript estrito, só bibliotecas do Expo Go
@@ -345,15 +345,17 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 
 **Revisit when:** antes da App Store (avaliar Maestro).
 
-### ADR-014: Importar o guia de certificação Microsoft pelo link (única saída de rede)
+### ADR-014: Importar o sumário pelo link do curso, de qualquer site (única saída de rede)
 
 **Status:** Accepted (25/11/2026)   **Drives:** FR-002, NFR-005, NFR-007   **Altera:** ADR-003 (rede)
 
 **Context:** Colar o sumário inteiro de uma página no celular é trabalhoso; ao copiar a página toda, parágrafos e avisos viravam tópicos (teste da dona com o guia da AI-103). Os guias de estudo de certificação Microsoft seguem a mesma estrutura: seção "Skills measured" / "Habilidades medidas" (h2), áreas com peso na prova (h3), subtemas (h4) e objetivos em lista. A API pública de catálogo da Microsoft começou a ser desativada em junho de 2026 e a nova exige autenticação, o que pediria um servidor.
 
 **Decision:**
-- A pessoa cola o link do guia de estudo (ou da página do exame, que é trocada pelo guia). O app baixa a página com um `fetch` GET, sem cookies nem dados da pessoa, e a lê no aparelho, sem IA e sem servidor.
-- Só `learn.microsoft.com` é aceito; outros sites recebem a orientação de colar o texto.
+- **Um campo só** (revisão de 25/11, pedido da dona): a pessoa cola um link ou um texto e o app descobre o que é (`src/domain/entrada.ts`). Nada de escolher modo, nada que pareça "app de certificação Microsoft".
+- Link de qualquer site: o app baixa a página com um `fetch` GET, sem cookies nem dados da pessoa, e a lê no aparelho, sem IA e sem servidor (`src/domain/pagina.ts`): primeiro os dados estruturados schema.org/Course (JSON-LD), depois a estrutura do HTML (títulos que se repetem viram módulos; o que vem embaixo vira tópico; menu, rodapé, FAQ e avaliações ficam de fora).
+- Guias de certificação Microsoft têm leitura própria, mais precisa (a página do exame é trocada pelo guia).
+- Páginas que exigem login ou montam a lista só com JavaScript não têm o que ler: a pessoa recebe o pedido de colar a lista de aulas.
 - Áreas viram módulos; **subtemas viram tópicos** (escolha da dona: cerca de 18 tópicos na AI-103, cada um em 1 ou 2 blocos); os objetivos ficam como "o que estudar" do tópico (coluna `topico.detalhes`, JSON).
 - O leitor é uma função pura em `src/domain/guiaMicrosoft.ts`, testada com uma réplica da página; o download fica em `src/platform/rede.ts`.
 
@@ -361,7 +363,7 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 - Mais fácil: começar uma certificação Microsoft em 2 toques.
 - Custo aceito: se a Microsoft mudar o HTML do guia, o leitor pode falhar. Mitigação: mensagem clara e o colar texto como alternativa sempre visível.
 
-**Alternatives:** IA lendo qualquer link (servidor e custo; adiada pela dona); API de catálogo (desativada/autenticada).
+**Alternatives:** IA lendo qualquer link ou texto (servidor e custo; adiada pela dona, candidata natural para os casos que a leitura no aparelho não resolve); API de catálogo (desativada/autenticada).
 
 **Revisit when:** a importação falhar em guias reais, ou quando entrar IA para outros sites.
 

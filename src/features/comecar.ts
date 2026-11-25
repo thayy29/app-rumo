@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import { db, schema } from '@/data/db';
 import { extrairGuiaMicrosoft, normalizarLinkGuia } from '@/domain/guiaMicrosoft';
+import { extrairDaPagina } from '@/domain/pagina';
 import { marcarAte, type SumarioImportado } from '@/domain/sumario';
 import { novoId } from '@/platform/id';
 import { baixarPagina } from '@/platform/rede';
@@ -36,29 +37,32 @@ export function salvarEstudo(entrada: {
   return { estudoId };
 }
 
-export type ResultadoLink =
-  | { ok: true; sumario: SumarioImportado }
-  | { ok: false; mensagem: string };
+export type ResultadoLink = { ok: true; sumario: SumarioImportado } | { ok: false; mensagem: string };
 
 const MENSAGENS = {
-  LINK_INVALIDO: 'Isso não parece um link. Copie o endereço completo, começando com https://',
-  NAO_E_MICROSOFT_LEARN: 'Por enquanto eu leio só guias do Microsoft Learn. Para outros cursos, cole o texto do sumário.',
-  SEM_HABILIDADES: 'Não achei a lista de habilidades nessa página. Use o link do "guia de estudo" da prova, ou cole o texto.',
-  SEM_INTERNET: 'Não consegui abrir o link agora. Confira a internet e tente de novo, ou cole o texto.',
+  SEM_SUMARIO:
+    'Não achei a lista de aulas nessa página. Alguns sites só mostram as aulas depois do login. Abra o curso, copie a lista de aulas e cole aqui.',
+  SEM_INTERNET: 'Não consegui abrir esse link agora. Confira a internet e tente de novo, ou cole a lista de aulas.',
 } as const;
 
-// ADR-014: lê o guia de estudo de uma certificação Microsoft a partir do link.
-export async function importarPorLink(link: string): Promise<ResultadoLink> {
-  const normal = normalizarLinkGuia(link);
-  if (!normal.ok) return { ok: false, mensagem: MENSAGENS[normal.erro] };
+// ADR-014: baixa a página que a pessoa colou e organiza o conteúdo no aparelho.
+// Guias de certificação Microsoft têm leitura própria (áreas, subtemas e objetivos); o resto usa a leitura geral.
+export async function importarPorLink(link: string, nomePadrao?: string): Promise<ResultadoLink> {
+  const guia = normalizarLinkGuia(link);
+  const url = guia.ok ? guia.url : link;
   let html: string;
   try {
-    html = await baixarPagina(normal.url);
-  } catch {
-    return { ok: false, mensagem: MENSAGENS.SEM_INTERNET };
+    html = await baixarPagina(url);
+  } catch (e) {
+    const status = e instanceof Error ? Number(e.message.replace('HTTP ', '')) : 0;
+    return { ok: false, mensagem: status >= 400 && status < 500 ? MENSAGENS.SEM_SUMARIO : MENSAGENS.SEM_INTERNET };
   }
-  const lido = extrairGuiaMicrosoft(html);
-  return lido.ok ? { ok: true, sumario: lido.sumario } : { ok: false, mensagem: MENSAGENS[lido.erro] };
+  if (guia.ok) {
+    const lido = extrairGuiaMicrosoft(html);
+    if (lido.ok) return { ok: true, sumario: lido.sumario };
+  }
+  const lido = extrairDaPagina(html, nomePadrao);
+  return lido.ok ? { ok: true, sumario: lido.sumario } : { ok: false, mensagem: MENSAGENS.SEM_SUMARIO };
 }
 
 // Consulta base: tópicos do estudo na ordem do sumário (módulo, depois tópico).

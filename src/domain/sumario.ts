@@ -1,6 +1,8 @@
 // Importa um sumário colado (de curso, guia de certificação ou PDF) em grupos e tópicos.
 // Funções puras: sem React, sem banco. Ver PRD v2, FR-002 e NFR-008.
 
+import { ehSoUmLink } from './entrada';
+
 export const LIMITE_LINHAS = 300;
 
 export type TopicoImportado = { texto: string; detalhes: string[] };
@@ -81,7 +83,7 @@ export function importarSumario(texto: string, nomePadrao: string): SumarioImpor
       grupos.push(atual);
       continue;
     }
-    if (ehTextoCorrido(limpa)) {
+    if (ehTextoCorrido(limpa) || ehSoUmLink(limpa)) {
       ignoradas++;
       continue;
     }

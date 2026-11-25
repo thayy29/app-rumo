@@ -11,9 +11,10 @@ type Dados = {
   tipo: TipoEstudo;
   nome: string;
   sumario: string;
-  link: string;
-  // Resultado da importação pelo link (o texto colado é importado na hora, a partir de `sumario`).
+  // `sumario` é o que a pessoa colou: link ou texto. Quando é link, guarda o resultado da leitura
+  // e de qual link ele veio, para não baixar de novo a cada renderização.
   doLink: SumarioImportado | null;
+  linkLido: string;
   estudoId: string | null;
 };
 
@@ -22,7 +23,7 @@ type Rascunho = Dados & {
   limpar: () => void;
 };
 
-const inicial: Dados = { tipo: 'certificacao', nome: '', sumario: '', link: '', doLink: null, estudoId: null };
+const inicial: Dados = { tipo: 'certificacao', nome: '', sumario: '', doLink: null, linkLido: '', estudoId: null };
 
 export const useRascunho = create<Rascunho>((set) => ({
   ...inicial,

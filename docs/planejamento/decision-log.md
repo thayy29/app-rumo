@@ -64,3 +64,11 @@ Registro só de acréscimo. Cada entrada: data, decisão, motivo, origem.
 - **Subtemas viram tópicos; objetivos viram "o que estudar".** AI-103: 5 módulos e cerca de 18 tópicos, em vez de cerca de 64 itens. Origem: dona.
 - **Colar texto fica mais tolerante (ADR-015, substitui ADR-009).** Ao colar a página inteira de um guia, lê só "Habilidades medidas"; descarta "Observação" e parágrafos; peso na prova "(25–30%)" vira módulo. Motivo: no teste, a introdução da página virou tópicos. Origem: teste da dona.
 - **Teclado:** o conteúdo das telas passa a rolar acima do botão; o botão não cobre mais o campo. Origem: teste da dona.
+
+## 25/11/2026 — Campo único de importação (revisão)
+
+- **Um campo só para link ou texto, com mensagem que muda conforme o que foi colado.** Sai o botão "É uma certificação Microsoft · usar o link", que fazia o app parecer exclusivo de certificações Microsoft. Origem: dona.
+- **Links de qualquer site.** Leitura no aparelho por dados estruturados (schema.org/Course) e pela estrutura da página; Microsoft mantém leitura própria. Páginas com login ou montadas por JavaScript pedem a lista colada. Origem: dona ("funcionalidade core").
+- **Link colado no meio de um texto não vira tópico.** Motivo: no teste, a URL virou o único tópico. Origem: teste da dona.
+- **Prévia da organização antes de continuar** (dois primeiros módulos e três tópicos de cada). Origem: PM.
+- **Fluxo Produtivo, estudado pelas apostilas (sem inspecionar o app):** a quebra macro/micro é manual sobre um modelo fixo de etapas; para projetos confusos, um agente GPT fora do app devolve o esqueleto. Conclusão: a organização robusta de qualquer conteúdo pede IA; fica como próxima decisão. Origem: análise pedida pela dona.
