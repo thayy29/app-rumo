@@ -1,9 +1,9 @@
 import { desc } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { Alert, Text, View } from 'react-native';
 
 import { db, schema } from '@/data/db';
+import { useAoVivo } from '@/data/aoVivo';
 import { porcentagem } from '@/domain/sumario';
 import { apagarEstudo, consultaTopicos, lerDetalhes } from '@/features/comecar';
 import { Barra, Botao, Cartao, Destaque, Fala, Tela } from '@/ui/componentes';
@@ -14,10 +14,10 @@ import { useCores } from '@/ui/useCores';
 // Na semana 3 ganha os estados do canvas; o Foco entra na semana 4.
 export default function Hoje() {
   const c = useCores();
-  const { data: estudos } = useLiveQuery(db.select().from(schema.estudo).orderBy(desc(schema.estudo.criadoEm)).limit(1));
+  const { data: estudos } = useAoVivo(db.select().from(schema.estudo).orderBy(desc(schema.estudo.criadoEm)).limit(1));
   const estudo = estudos[0];
   const estudoId = estudo?.id ?? '';
-  const { data: topicos } = useLiveQuery(consultaTopicos(estudoId), [estudoId]);
+  const { data: topicos } = useAoVivo(consultaTopicos(estudoId), [estudoId]);
 
   const feitos = topicos.filter((t) => t.feitoEm !== null).length;
   const pct = porcentagem(feitos, topicos.length);

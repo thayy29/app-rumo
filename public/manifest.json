@@ -1,0 +1,14 @@
+{
+  "name": "Rumo",
+  "short_name": "Rumo",
+  "start_url": "/app-rumo/",
+  "scope": "/app-rumo/",
+  "display": "standalone",
+  "background_color": "#F7F4EA",
+  "theme_color": "#F7F4EA",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/app-rumo/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/app-rumo/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

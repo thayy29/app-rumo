@@ -20,13 +20,21 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "name": "Rumo",
+      "shortName": "Rumo",
+      "themeColor": "#F7F4EA",
+      "backgroundColor": "#F7F4EA"
     },
     "plugins": [
       "expo-router",
       "expo-sqlite",
       "expo-status-bar"
     ],
-    "scheme": "rumo"
+    "scheme": "rumo",
+    "experiments": {
+      "baseUrl": "/app-rumo"
+    }
   }
 }

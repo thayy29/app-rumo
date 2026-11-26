@@ -27,7 +27,7 @@ export default function Inicio() {
           >
             Começar
           </Botao>
-          <Text style={[tipo.nota, { color: c.apoio, textAlign: 'center', marginTop: 6 }]}>Sem cadastro. Seus dados ficam no seu iPhone.</Text>
+          <Text style={[tipo.nota, { color: c.apoio, textAlign: 'center', marginTop: 6 }]}>Sem cadastro. Seus dados ficam só no seu celular.</Text>
         </>
       }
     >

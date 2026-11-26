@@ -1,10 +1,10 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import * as Haptics from 'expo-haptics';
-import { SymbolView } from 'expo-symbols';
+import { Simbolo } from '@/ui/Simbolo';
 import { router } from 'expo-router';
 import { Fragment, useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { useAoVivo } from '@/data/aoVivo';
 import { porcentagem } from '@/domain/sumario';
 import { consultaTopicos, marcarAteOTopico } from '@/features/comecar';
 import { useRascunho } from '@/state/rascunho';
@@ -17,7 +17,7 @@ export default function AteOnde() {
   const c = useCores();
   const estudoId = useRascunho((s) => s.estudoId) ?? '';
   const limpar = useRascunho((s) => s.limpar);
-  const { data: topicos } = useLiveQuery(consultaTopicos(estudoId), [estudoId]);
+  const { data: topicos } = useAoVivo(consultaTopicos(estudoId), [estudoId]);
 
   const feitos = topicos.filter((t) => t.feitoEm !== null).length;
   const pct = porcentagem(feitos, topicos.length);
@@ -108,7 +108,7 @@ export default function AteOnde() {
                         }}
                       >
                         {item.feito ? (
-                          <SymbolView name="checkmark" size={12} weight="bold" tintColor="#2A2722" />
+                          <Simbolo name="checkmark" size={12} weight="bold" tintColor="#2A2722" />
                         ) : (
                           <Text style={{ fontSize: 12, fontWeight: '700', color: c.apoio }}>{i + 1}</Text>
                         )}
