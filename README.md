@@ -58,6 +58,14 @@ npx expo lint       # lint
 
 Teste também com o iPhone no **modo escuro** e com o **texto grande** (Ajustes > Acessibilidade > Tela e Tamanho do Texto).
 
+## Testar pelo link (sem instalar nada)
+
+Para família e amigos: abrir **https://thayy29.github.io/app-rumo/** no Safari do iPhone, tocar em Compartilhar > **Adicionar à Tela de Início** e usar pelo ícone.
+
+- Os dados ficam no navegador do celular (limpar os dados do Safari apaga o progresso).
+- Sem notificações e sem leitura de links nesta versão: o navegador não permite sem servidor.
+- Publicar uma versão nova: `./scripts/publicar-web.sh` (gera o build web e envia para a branch `gh-pages`).
+
 ## Estrutura
 
 ```
