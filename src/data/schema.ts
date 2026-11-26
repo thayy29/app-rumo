@@ -30,6 +30,8 @@ export const topico = sqliteTable('topico', {
   // "O que estudar": objetivos do guia de certificação, em JSON (lista de textos).
   detalhes: text('detalhes'),
   feitoEm: integer('feito_em'),
+  // "Onde parei": uma linha escrita ao fechar um bloco sem terminar o passo (R5).
+  ondeParei: text('onde_parei'),
 });
 
 export const bloco = sqliteTable('bloco', {
@@ -41,6 +43,8 @@ export const bloco = sqliteTable('bloco', {
   pausadoEm: integer('pausado_em'),
   notificacaoId: text('notificacao_id'),
   encerradoEm: integer('encerrado_em'),
+  // Como o bloco terminou: o passo foi concluído ou ainda continua (R5).
+  resposta: text('resposta', { enum: ['terminei', 'continua'] }),
 });
 
 export type Bloco = typeof bloco.$inferSelect;
