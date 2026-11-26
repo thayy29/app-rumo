@@ -1,17 +1,15 @@
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Text, View } from 'react-native';
 
-import { db } from '@/data/db';
+import { useBancoPronto } from '@/data/preparar';
 import '@/platform/notificacoes';
 import { useCores } from '@/ui/useCores';
-import migrations from '../../drizzle/migrations';
 
 export default function RootLayout() {
   const c = useCores();
   // As migrações rodam antes de qualquer tela (ADR-002).
-  const { success, error } = useMigrations(db, migrations);
+  const { pronto: success, erro: error } = useBancoPronto();
 
   if (error) {
     return (
