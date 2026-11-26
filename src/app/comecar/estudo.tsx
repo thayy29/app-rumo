@@ -1,4 +1,4 @@
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import { Simbolo, type NomeSimbolo } from '@/ui/Simbolo';
 import { router } from 'expo-router';
 import { type ComponentRef, useRef } from 'react';
 import { Pressable, type ScrollView, Text, TextInput, View } from 'react-native';
@@ -8,7 +8,7 @@ import { Botao, Destaque, Etapas, Fala, Icone, Rotulo, Tela } from '@/ui/compone
 import { raio, tipo } from '@/ui/tokens';
 import { useCores } from '@/ui/useCores';
 
-const TIPOS: { id: TipoEstudo; rotulo: string; simbolo: SymbolViewProps['name']; exemplo: string }[] = [
+const TIPOS: { id: TipoEstudo; rotulo: string; simbolo: NomeSimbolo; exemplo: string }[] = [
   { id: 'certificacao', rotulo: 'Certificação', simbolo: 'list.bullet', exemplo: 'Ex.: AWS Cloud Practitioner' },
   { id: 'curso', rotulo: 'Curso online', simbolo: 'laptopcomputer', exemplo: 'Ex.: React do zero' },
   { id: 'idioma', rotulo: 'Idioma', simbolo: 'book', exemplo: 'Ex.: Inglês B2' },
@@ -54,7 +54,7 @@ export default function ComecarEstudo() {
               >
                 {on ? (
                   <View style={{ position: 'absolute', top: 10, right: 10, width: 22, height: 22, borderRadius: 11, backgroundColor: c.destaque, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: c.destaqueTinta }}>
-                    <SymbolView name="checkmark" size={11} weight="bold" tintColor="#2A2722" />
+                    <Simbolo name="checkmark" size={11} weight="bold" tintColor="#2A2722" />
                   </View>
                 ) : null}
                 <Icone simbolo={t.simbolo} />

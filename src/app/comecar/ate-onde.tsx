@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { SymbolView } from 'expo-symbols';
+import { Simbolo } from '@/ui/Simbolo';
 import { router } from 'expo-router';
 import { Fragment, useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -108,7 +108,7 @@ export default function AteOnde() {
                         }}
                       >
                         {item.feito ? (
-                          <SymbolView name="checkmark" size={12} weight="bold" tintColor="#2A2722" />
+                          <Simbolo name="checkmark" size={12} weight="bold" tintColor="#2A2722" />
                         ) : (
                           <Text style={{ fontSize: 12, fontWeight: '700', color: c.apoio }}>{i + 1}</Text>
                         )}

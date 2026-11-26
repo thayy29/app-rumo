@@ -1,4 +1,4 @@
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import { Simbolo, type NomeSimbolo } from '@/ui/Simbolo';
 import { router } from 'expo-router';
 import { type ComponentRef, type ReactNode, type Ref, useMemo } from 'react';
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
@@ -115,11 +115,11 @@ export function Botao({
   );
 }
 
-export function BotaoCircular({ simbolo, rotulo, onPress }: { simbolo: SymbolViewProps['name']; rotulo: string; onPress: () => void }) {
+export function BotaoCircular({ simbolo, rotulo, onPress }: { simbolo: NomeSimbolo; rotulo: string; onPress: () => void }) {
   const { c, s } = useEstilos();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={rotulo} onPress={onPress} hitSlop={6} style={({ pressed }) => [s.circular, pressed && { opacity: 0.7 }]}>
-      <SymbolView name={simbolo} size={17} weight="semibold" tintColor={c.texto} />
+      <Simbolo name={simbolo} size={17} weight="semibold" tintColor={c.texto} />
     </Pressable>
   );
 }
@@ -151,9 +151,9 @@ export function Cartao({ children, estilo }: { children: ReactNode; estilo?: Vie
   return <View style={[s.cartao, estilo]}>{children}</View>;
 }
 
-export function Icone({ simbolo, tamanho = 20, fundo = true }: { simbolo: SymbolViewProps['name']; tamanho?: number; fundo?: boolean }) {
+export function Icone({ simbolo, tamanho = 20, fundo = true }: { simbolo: NomeSimbolo; tamanho?: number; fundo?: boolean }) {
   const { c } = useEstilos();
-  const icone = <SymbolView name={simbolo} size={tamanho} tintColor={c.acao} />;
+  const icone = <Simbolo name={simbolo} size={tamanho} tintColor={c.acao} />;
   if (!fundo) return icone;
   return (
     <View style={{ width: tamanho * 2, height: tamanho * 2, borderRadius: tamanho, backgroundColor: c.tinta, alignItems: 'center', justifyContent: 'center' }}>
