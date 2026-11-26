@@ -1,8 +1,18 @@
-# Rumo — spike da semana 1
+# Rumo
 
-App para quem largou um curso online ou uma certificação e quer retomar de onde parou. Este repositório começa com o **spike**: uma prova técnica que confirma, no seu iPhone, as 5 peças arriscadas antes de construir as telas de verdade.
+App para quem largou um curso online ou uma certificação e quer retomar de onde parou: cola o sumário, marca até onde foi e vê quanto já fez.
 
-Planejamento completo em [`docs/planejamento`](docs/planejamento): PRD v2, arquitetura, design e registro de decisões.
+Planejamento completo em [`docs/planejamento`](docs/planejamento): PRD v2, arquitetura, design e registro de decisões. Telas de referência no canvas "Rumo — retomar estudo (v2)".
+
+## Onde estamos
+
+| Semana | Entrega | Situação |
+|---|---|---|
+| 1 | Spike técnico (banco, importador, timer, notificações, sheet) | ✅ os 5 testes passaram no iPhone |
+| 2 | Início, Começar (estudo e sumário) e Até onde você foi | ✅ nesta versão |
+| 3 | Hoje com os estados do canvas | a fazer |
+| 4 | Foco, fechamento do bloco e Progresso | a fazer |
+| 5 | Volta depois de sumir, lembrete, acabamento | a fazer |
 
 ## Stack
 
@@ -36,46 +46,31 @@ npm run typecheck   # TypeScript
 npx expo lint       # lint
 ```
 
-## Os 5 testes
+## Como testar esta versão
 
-Abra o app no iPhone e siga cada cartão da tela. Anote o resultado na tabela do fim.
+1. Abra o app: aparece o **Início** com o mascote e o "rumo.".
+2. **Começar** → escolha o tipo e dê um nome.
+3. **Certificação Microsoft:** cole o link do guia de estudo, por exemplo `https://learn.microsoft.com/pt-br/credentials/certifications/resources/study-guides/ai-103`, e toque em **Ler o guia**. As áreas da prova viram módulos e os subtemas viram tópicos. O link da página do exame também funciona.
+   **Outro curso:** toque em "Não é Microsoft · colar o sumário" e cole o texto. Avisos e parágrafos ficam de fora; o cartão diz quantas linhas foram ignoradas.
+4. **Toque no último tópico que você fez**: ele e os anteriores ficam marcados e aparece a porcentagem. Tocar de novo no "último feito" desmarca ele.
+5. **Ir para o Hoje**: mostra o próximo tópico, o "o que estudar" (quando veio do guia) e a porcentagem (versão provisória; os estados do canvas chegam na semana 3).
+6. Feche o app à força e abra de novo: ele volta direto no Hoje. "Trocar de estudo" apaga e volta ao Início.
 
-| # | Teste | Como fazer | Passou se… |
-|---|---|---|---|
-| 1 | **Banco local** | Importe um sumário (teste 2). Feche o app à força (deslize para cima no seletor de apps) e reabra. | Os números de estudos, tópicos e tópicos feitos continuam iguais. |
-| 2 | **Colar o sumário** | Troque o exemplo por um sumário real copiado de um curso seu. Toque em Importar e depois no último tópico que você terminou. | O resumo "N tópicos em M módulos" bate com o curso e a porcentagem aparece. |
-| 3 | **Timer** | Comece um bloco de 1 min e feche o app à força. Espere o aviso. Reabra. Depois teste Pausar e Retomar num bloco de 25 min. | O aviso de fim chega com o app fechado e o tempo mostrado bate com o relógio (±1 s). |
-| 4 | **Notificações** | Toque em "Lembrete em 2 min" e feche o app. Depois toque em "Lembrete diário às 20h". | O lembrete chega com o app fechado; "Agendadas agora" mostra os pendentes. |
-| 5 | **Sheet nativa** | Toque em "Abrir sheet", arraste para cima e para baixo, feche arrastando. | Abre e fecha com o gesto do iPhone, com alça e fundo recuando. |
-
-### Resultado
-
-| # | Resultado | Observação |
-|---|---|---|
-| 1 | ☐ passou ☐ não passou ☐ com ajuste | |
-| 2 | ☐ passou ☐ não passou ☐ com ajuste | Plataforma do sumário: |
-| 3 | ☐ passou ☐ não passou ☐ com ajuste | |
-| 4 | ☐ passou ☐ não passou ☐ com ajuste | |
-| 5 | ☐ passou ☐ não passou ☐ com ajuste | |
-
-Se algo falhar, copie a mensagem de erro (do terminal ou da tela vermelha) para corrigir.
+Teste também com o iPhone no **modo escuro** e com o **texto grande** (Ajustes > Acessibilidade > Tela e Tamanho do Texto).
 
 ## Estrutura
 
 ```
 src/
-  app/          telas (expo-router): _layout, index (spike), sheet
+  app/          telas (expo-router): inicio, comecar/*, hoje
   domain/       regras puras e testadas: importador de sumário, timer por carimbos
   data/         SQLite + Drizzle: schema e conexão
   features/     casos de uso (cada ação = uma transação)
   platform/     notificações, IDs
-  ui/           tokens de cor do DESIGN.md
+  state/        estado efêmero do fluxo de começo (Zustand)
+  ui/           tokens, mascote, logotipo e componentes do design
 drizzle/        migrações geradas (npm run db:generate)
 docs/           planejamento (PRD, arquitetura, design, decisões)
 ```
 
 Regra de dependência: `app → features → (domain, data, platform)`. O `domain` não importa nada de fora dele.
-
-## Depois do spike
-
-Com os 5 testes passando, a semana 2 começa a v0.1: colar o sumário e "até onde você foi" nas telas reais do canvas, seguido de Hoje, Foco e Progresso. A tela de spike sai.

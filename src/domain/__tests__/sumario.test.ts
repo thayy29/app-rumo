@@ -46,7 +46,15 @@ Módulo 2 · Segurança
 
   it('sem linhas de módulo, usa o nome do estudo como grupo único', () => {
     const s = importarSumario('Aula 1: Introdução\nAula 2: Variáveis\n', 'Curso de JS');
-    expect(s.grupos).toEqual([{ nome: 'Curso de JS', topicos: ['Aula 1: Introdução', 'Aula 2: Variáveis'] }]);
+    expect(s.grupos).toEqual([
+      {
+        nome: 'Curso de JS',
+        topicos: [
+          { texto: 'Aula 1: Introdução', detalhes: [] },
+          { texto: 'Aula 2: Variáveis', detalhes: [] },
+        ],
+      },
+    ]);
   });
 
   it('reconhece Seção, Capítulo, Unidade e Domínio', () => {
@@ -56,7 +64,7 @@ Módulo 2 · Segurança
 
   it('ignora reticências e descarta grupos vazios', () => {
     const s = importarSumario('Módulo 1\n…\nMódulo 2\nTópico', 'x');
-    expect(s.grupos).toEqual([{ nome: 'Módulo 2', topicos: ['Tópico'] }]);
+    expect(s.grupos).toEqual([{ nome: 'Módulo 2', topicos: [{ texto: 'Tópico', detalhes: [] }] }]);
     expect(s.linhasIgnoradas).toBe(1);
   });
 
@@ -65,6 +73,50 @@ Módulo 2 · Segurança
     const s = importarSumario(texto, 'x');
     expect(s.truncado).toBe(true);
     expect(s.totalTopicos).toBe(300);
+  });
+});
+
+describe('colar a página inteira de um guia (o caso do print)', () => {
+  const pagina = `Guia de estudo para o Exame AI-103
+Finalidade deste documento
+Este guia de estudo deve ajudar você a entender o que esperar do exame e inclui um resumo dos tópicos.
+Observação
+Os marcadores que seguem cada uma das habilidades medidas destinam-se a ilustrar como estamos avaliando essa habilidade. Tópicos relacionados podem ser abordados no exame.
+Observação
+A maioria das perguntas aborda recursos que estão em disponibilidade geral.
+Habilidades medidas a partir de 16 de abril de 2026
+Planejar e gerenciar uma solução de IA do Azure (25–30%)
+Escolher os serviços adequados do Foundry
+Escolher um modelo apropriado para cada tarefa, incluindo modelos de linguagem grandes, modelos pequenos, modelos multimodais e ferramentas do Foundry
+Configurar soluções de IA no Foundry
+Implementar soluções de IA generativa e agênticas (30–35%)
+Criar agentes
+Recursos de estudo
+Caminho de aprendizado`;
+
+  const s = importarSumario(pagina, 'AI-103');
+
+  it('lê só a seção de habilidades e usa o peso na prova como módulo', () => {
+    expect(s.grupos.map((g) => g.nome)).toEqual([
+      'Planejar e gerenciar uma solução de IA do Azure (25–30%)',
+      'Implementar soluções de IA generativa e agênticas (30–35%)',
+    ]);
+  });
+
+  it('descarta parágrafos e avisos; mantém os subtemas', () => {
+    expect(s.grupos.flatMap((g) => g.topicos.map((t) => t.texto))).toEqual([
+      'Escolher os serviços adequados do Foundry',
+      'Configurar soluções de IA no Foundry',
+      'Criar agentes',
+    ]);
+  });
+});
+
+describe('texto corrido em sumário comum', () => {
+  it('ignora "Observação" e parágrafos, conta como ignorados', () => {
+    const s = importarSumario('Observação\nEste curso tem 10 horas de vídeo e exercícios práticos para você praticar.\nAula 1\nAula 2', 'x');
+    expect(s.totalTopicos).toBe(2);
+    expect(s.linhasIgnoradas).toBe(2);
   });
 });
 

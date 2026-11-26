@@ -49,3 +49,26 @@ Registro só de acréscimo. Cada entrada: data, decisão, motivo, origem.
 - **Compra dentro do app só depois da validação de uso.** Compras da Apple exigem conta paga e build próprio; a intenção de compra é medida por pré-venda fora do app. Origem: PM.
 - **Telas v2 publicadas no mesmo canvas** (32 pranchetas): Começar ganha uma terceira etapa e o Progresso substitui o Caminho; nova sheet "Rumo completo". Origem: PM/UX.
 - **Arquitetura precisa de atualização:** ADR-009 substituída por importador de sumário; nova ADR de compra única. Pendente. Origem: PM.
+
+## 25/11/2026 — Spike da semana 1 concluído
+
+- **Os 5 testes passaram no iPhone da dona** (banco local sobrevive a fechar à força, importador de sumário, timer por carimbos com aviso de fim, notificações locais com o app fechado, sheet nativa). Base técnica confirmada no Expo Go. Origem: dona.
+- **Projeto no Expo SDK 58** (React Native 0.88): o Expo Go da App Store já está no 58 e recusou o projeto no 57. Origem: teste da dona.
+- **Login da Expo:** a conta precisa estar com e-mail verificado ou com senha; o login por código de e-mail não funciona antes da verificação. Origem: dona.
+- **Repositório:** github.com/thayy29/app-rumo, branch `spike/semana-1`. Origem: dona.
+- **v0.1 sai grátis, sem tela de compra.** Usuárias reais antes de cobrar; a compra única entra numa versão seguinte. Escopo da v0.1: Começar (estudo + sumário), Até onde você foi, Hoje, Foco com fechamento, Progresso. Origem: dona (24/11).
+
+## 25/11/2026 — Importação pelo link e correções da semana 2
+
+- **Importar pelo link do guia de certificação Microsoft (ADR-014).** O app baixa a página do guia que a pessoa colou e lê áreas e subtemas no aparelho, sem IA e sem servidor. Única saída de rede do app; nenhum dado da pessoa é enviado. Motivo: colar o sumário inteiro no celular é trabalhoso (caso real da AI-103). Origem: dona (ideia e escolha da opção A).
+- **Subtemas viram tópicos; objetivos viram "o que estudar".** AI-103: 5 módulos e cerca de 18 tópicos, em vez de cerca de 64 itens. Origem: dona.
+- **Colar texto fica mais tolerante (ADR-015, substitui ADR-009).** Ao colar a página inteira de um guia, lê só "Habilidades medidas"; descarta "Observação" e parágrafos; peso na prova "(25–30%)" vira módulo. Motivo: no teste, a introdução da página virou tópicos. Origem: teste da dona.
+- **Teclado:** o conteúdo das telas passa a rolar acima do botão; o botão não cobre mais o campo. Origem: teste da dona.
+
+## 25/11/2026 — Campo único de importação (revisão)
+
+- **Um campo só para link ou texto, com mensagem que muda conforme o que foi colado.** Sai o botão "É uma certificação Microsoft · usar o link", que fazia o app parecer exclusivo de certificações Microsoft. Origem: dona.
+- **Links de qualquer site.** Leitura no aparelho por dados estruturados (schema.org/Course) e pela estrutura da página; Microsoft mantém leitura própria. Páginas com login ou montadas por JavaScript pedem a lista colada. Origem: dona ("funcionalidade core").
+- **Link colado no meio de um texto não vira tópico.** Motivo: no teste, a URL virou o único tópico. Origem: teste da dona.
+- **Prévia da organização antes de continuar** (dois primeiros módulos e três tópicos de cada). Origem: PM.
+- **Fluxo Produtivo, estudado pelas apostilas (sem inspecionar o app):** a quebra macro/micro é manual sobre um modelo fixo de etapas; para projetos confusos, um agente GPT fora do app devolve o esqueleto. Conclusão: a organização robusta de qualquer conteúdo pede IA; fica como próxima decisão. Origem: análise pedida pela dona.
