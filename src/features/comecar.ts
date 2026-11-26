@@ -1,4 +1,5 @@
 import { asc, eq } from 'drizzle-orm';
+import { Platform } from 'react-native';
 
 import { db, schema } from '@/data/db';
 import { extrairGuiaMicrosoft, normalizarLinkGuia } from '@/domain/guiaMicrosoft';
@@ -42,12 +43,15 @@ export type ResultadoLink = { ok: true; sumario: SumarioImportado } | { ok: fals
 const MENSAGENS = {
   SEM_SUMARIO:
     'Não achei a lista de aulas nessa página. Alguns sites só mostram as aulas depois do login. Abra o curso, copie a lista de aulas e cole aqui.',
+  NA_WEB: 'Na versão pelo navegador eu ainda não consigo ler links. Cole a lista de aulas, ou só escreva o seu próximo passo.',
   SEM_INTERNET: 'Não consegui abrir esse link agora. Confira a internet e tente de novo, ou cole a lista de aulas.',
 } as const;
 
 // ADR-014: baixa a página que a pessoa colou e organiza o conteúdo no aparelho.
 // Guias de certificação Microsoft têm leitura própria (áreas, subtemas e objetivos); o resto usa a leitura geral.
 export async function importarPorLink(link: string, nomePadrao?: string): Promise<ResultadoLink> {
+  // O navegador bloqueia a leitura de páginas de outros sites (CORS); só o app instalado lê links.
+  if (Platform.OS === 'web') return { ok: false, mensagem: MENSAGENS.NA_WEB };
   const guia = normalizarLinkGuia(link);
   const url = guia.ok ? guia.url : link;
   let html: string;
