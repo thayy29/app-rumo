@@ -1,0 +1,1 @@
+ALTER TABLE `estudo` ADD `arquivado_em` integer;

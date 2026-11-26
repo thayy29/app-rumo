@@ -7,6 +7,8 @@ export const estudo = sqliteTable('estudo', {
   nome: text('nome').notNull(),
   tipo: text('tipo', { enum: ['certificacao', 'curso', 'idioma', 'outro'] }).notNull(),
   criadoEm: integer('criado_em').notNull(),
+  // Começar outro projeto arquiva o atual em vez de apagar: o histórico de uso do teste continua (R1).
+  arquivadoEm: integer('arquivado_em'),
 });
 
 export const grupo = sqliteTable('grupo', {
