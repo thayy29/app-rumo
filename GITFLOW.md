@@ -83,12 +83,10 @@
 
 - Mesmo sozinha: **toda branch entra na `main` via PR** (mostra processo profissional).
 - Título do PR no formato de commit: `feat(syllabus): import course syllabus`
-- Descrição:
-  ```
-  ## O quê
-  ## Por quê
-  ## Como testar
-  ## Screenshots / GIF (se for UI)
+- Descrição: usar o template `.github/pull_request_template.md` (o GitHub preenche sozinho).
++   - Até ~10 linhas. O diff mostra os arquivos; a descrição explica o que ele não explica.
++   - O quê = resultado visível · Por quê = 1–2 linhas, com link para ADR/issue
++   - Notas só para limitação, risco ou dependência de outro PR
   ```
 - Merge: **"Rebase and merge"** ou **"Create a merge commit"**. **Não usar squash**: preserva os commits pequenos no histórico.
 
