@@ -1,11 +1,10 @@
-import { desc } from 'drizzle-orm';
 import { router } from 'expo-router';
-import { Alert, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { db, schema } from '@/data/db';
 import { useAoVivo } from '@/data/aoVivo';
 import { porcentagem } from '@/domain/sumario';
-import { apagarEstudo, consultaTopicos, lerDetalhes } from '@/features/comecar';
+import { arquivarEstudo, consultaEstudoAtivo, consultaTopicos, lerDetalhes } from '@/features/comecar';
+import { confirmar } from '@/platform/confirmar';
 import { Barra, Botao, Cartao, Destaque, Fala, Tela } from '@/ui/componentes';
 import { tipo } from '@/ui/tokens';
 import { useCores } from '@/ui/useCores';
@@ -14,7 +13,7 @@ import { useCores } from '@/ui/useCores';
 // Na semana 3 ganha os estados do canvas; o Foco entra na semana 4.
 export default function Hoje() {
   const c = useCores();
-  const { data: estudos } = useAoVivo(db.select().from(schema.estudo).orderBy(desc(schema.estudo.criadoEm)).limit(1));
+  const { data: estudos } = useAoVivo(consultaEstudoAtivo());
   const estudo = estudos[0];
   const estudoId = estudo?.id ?? '';
   const { data: topicos } = useAoVivo(consultaTopicos(estudoId), [estudoId]);
@@ -26,18 +25,15 @@ export default function Hoje() {
   const posicao = proximo ? doGrupo.findIndex((t) => t.id === proximo.id) + 1 : 0;
   const oQueEstudar = lerDetalhes(proximo?.detalhes ?? null);
 
-  function trocar() {
-    Alert.alert('Trocar de estudo?', 'O estudo atual e o progresso dele serão apagados deste iPhone.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Apagar e trocar',
-        style: 'destructive',
-        onPress: () => {
-          if (estudoId) apagarEstudo(estudoId);
-          router.replace('/inicio');
-        },
-      },
-    ]);
+  async function trocar() {
+    const sim = await confirmar({
+      titulo: 'Trocar de estudo?',
+      mensagem: 'O estudo atual fica guardado e sai do Hoje. Você começa outro do zero.',
+      confirmar: 'Trocar',
+    });
+    if (!sim) return;
+    if (estudoId) arquivarEstudo(estudoId);
+    router.replace('/inicio');
   }
 
   return (

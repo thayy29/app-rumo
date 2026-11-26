@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, desc, eq, isNull } from 'drizzle-orm';
 import { Platform } from 'react-native';
 
 import { db, schema } from '@/data/db';
@@ -109,6 +109,12 @@ export function marcarAteOTopico(estudoId: string, indice: number): void {
   });
 }
 
-export function apagarEstudo(estudoId: string): void {
-  db.delete(estudo).where(eq(estudo.id, estudoId)).run();
+// R1: um projeto ativo por vez. Começar outro arquiva o atual; nada é apagado.
+export function arquivarEstudo(estudoId: string): void {
+  db.update(estudo).set({ arquivadoEm: Date.now() }).where(eq(estudo.id, estudoId)).run();
+}
+
+// O projeto que aparece no Hoje: o mais recente que não foi arquivado.
+export function consultaEstudoAtivo() {
+  return db.select().from(estudo).where(isNull(estudo.arquivadoEm)).orderBy(desc(estudo.criadoEm)).limit(1);
 }
