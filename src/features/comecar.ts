@@ -77,6 +77,7 @@ export function consultaTopicos(estudoId: string) {
       texto: topico.texto,
       detalhes: topico.detalhes,
       feitoEm: topico.feitoEm,
+      ondeParei: topico.ondeParei,
       grupoId: grupo.id,
       grupo: grupo.nome,
     })
