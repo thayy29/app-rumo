@@ -2,12 +2,12 @@ import { and, asc, desc, eq, isNotNull, isNull, max } from 'drizzle-orm';
 
 import { FASES, type Estilo, type Fase } from '@/base';
 import { db, schema } from '@/data/db';
-import { fasesAntes, faseVigente, montarTrilha } from '@/domain/trilha';
+import { fasesAntes, faseVigente, trilhaComModelos } from '@/domain/trilha';
 import { novoId } from '@/platform/id';
 
 // Casos de uso da track (FR-022 a FR-030). Cada ação grava antes da tela mudar (ADR-002).
 
-const { track, tarefa, bloco, notaDaFase } = schema;
+const { track, tarefa, bloco, notaDaFase, modeloTarefa } = schema;
 
 export type NovaTrack = { nome: string; estilo: Estilo; bpm: number; destino: 'pista' | 'streaming'; fase: Fase };
 
@@ -22,21 +22,13 @@ export function criarTrack(dados: NovaTrack): string {
     tx.insert(track)
       .values({ id, nome: dados.nome.trim() || 'Track sem nome', estilo: dados.estilo, bpm: dados.bpm, destino: dados.destino, faseAtual: dados.fase, criadaEm: agora, escolhidaEm: agora })
       .run();
-    const linhas = montarTrilha(dados.estilo).map((t) => ({
+    // Fases com modelo próprio usam o modelo; as outras, a base (FR-023).
+    const modelos = tx.select().from(modeloTarefa).orderBy(asc(modeloTarefa.ordem)).all();
+    const linhas = trilhaComModelos(dados.estilo, modelos).map((t) => ({
+      ...t,
       id: novoId(),
       trackId: id,
-      fase: t.fase,
-      ordem: t.ordem,
-      baseId: t.id,
-      tipo: t.tipo,
-      texto: t.texto,
-      prontoQuando: t.prontoQuando,
-      versaoFeia: t.versaoFeia,
-      grupo: t.grupo ?? null,
-      secao: t.secao ?? null,
-      parametro: t.parametro ?? null,
-      escolhida: t.escolhida,
-      feitaEm: (antes.has(t.fase) && t.escolhida) || respondidas.has(t.id) ? agora : null,
+      feitaEm: (antes.has(t.fase) && t.escolhida) || (t.baseId !== null && respondidas.has(t.baseId)) ? agora : null,
     }));
     // Em lotes: o SQLite limita a quantidade de parâmetros por comando.
     for (let i = 0; i < linhas.length; i += 20) tx.insert(tarefa).values(linhas.slice(i, i + 20)).run();
@@ -164,4 +156,43 @@ export function salvarNota(trackId: string, fase: Fase, texto: string): void {
     .values({ trackId, fase, texto: limpo, atualizadaEm: Date.now() })
     .onConflictDoUpdate({ target: [notaDaFase.trackId, notaDaFase.fase], set: { texto: limpo, atualizadaEm: Date.now() } })
     .run();
+}
+
+// Modelo próprio: a lista atual da fase vira o ponto de partida das próximas tracks.
+export function salvarModelo(trackId: string, fase: Fase): void {
+  const daFase = db
+    .select()
+    .from(tarefa)
+    .where(and(eq(tarefa.trackId, trackId), eq(tarefa.fase, fase)))
+    .orderBy(asc(tarefa.ordem))
+    .all();
+  if (daFase.length === 0) return;
+  const agora = Date.now();
+  db.transaction((tx) => {
+    tx.delete(modeloTarefa).where(eq(modeloTarefa.fase, fase)).run();
+    const linhas = daFase.map((t, ordem) => ({
+      id: novoId(),
+      fase,
+      ordem,
+      baseId: t.baseId,
+      tipo: t.tipo,
+      texto: t.texto,
+      prontoQuando: t.prontoQuando,
+      versaoFeia: t.versaoFeia,
+      grupo: t.grupo,
+      secao: t.secao,
+      parametro: t.parametro,
+      criadoEm: agora,
+    }));
+    for (let i = 0; i < linhas.length; i += 20) tx.insert(modeloTarefa).values(linhas.slice(i, i + 20)).run();
+  });
+}
+
+export function apagarModelo(fase: Fase): void {
+  db.delete(modeloTarefa).where(eq(modeloTarefa.fase, fase)).run();
+}
+
+// Fases que têm modelo próprio.
+export function consultaFasesComModelo() {
+  return db.selectDistinct({ fase: modeloTarefa.fase }).from(modeloTarefa);
 }

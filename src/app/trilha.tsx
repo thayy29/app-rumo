@@ -4,7 +4,17 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { FASE, FASES, type Fase } from '@/base';
 import { useAoVivo } from '@/data/aoVivo';
-import { adicionarTarefa, alternarFeita, apagarTarefaPropria, consultaNotas, salvarNota } from '@/features/track';
+import {
+  adicionarTarefa,
+  alternarFeita,
+  apagarModelo,
+  apagarTarefaPropria,
+  consultaFasesComModelo,
+  consultaNotas,
+  salvarModelo,
+  salvarNota,
+} from '@/features/track';
+import { confirmar } from '@/platform/confirmar';
 import { useTrackAtiva } from '@/features/useTrackAtiva';
 import { Grupo, Tela } from '@/ui/componentes';
 import { LinhaTarefa, Separador, Topo } from '@/ui/estudio';
@@ -20,11 +30,31 @@ export default function Trilha() {
   const { track, tarefas, fase } = useTrackAtiva();
   const trackId = track?.id ?? '';
   const { data: notas } = useAoVivo(consultaNotas(trackId), [trackId]);
+  const { data: comModelo } = useAoVivo(consultaFasesComModelo());
   const [adicionando, setAdicionando] = useState(false);
   const [texto, setTexto] = useState('');
   const [abertas, setAbertas] = useState<Set<Fase>>(new Set());
 
   if (!track) return null;
+
+  async function guardarModelo(f: Fase) {
+    if (!track) return;
+    const sim = await confirmar({
+      titulo: `Salvar o modelo de ${FASE[f].apelido}?`,
+      mensagem: 'As próximas tracks começam esta fase com esta lista, incluindo as tarefas que você criou.',
+      confirmar: 'Salvar modelo',
+    });
+    if (sim) salvarModelo(track.id, f);
+  }
+
+  async function voltarAoPadrao(f: Fase) {
+    const sim = await confirmar({
+      titulo: 'Voltar ao padrão do Rumo?',
+      mensagem: `As próximas tracks usam a lista do Rumo em ${FASE[f].apelido}. Esta track não muda.`,
+      confirmar: 'Voltar ao padrão',
+    });
+    if (sim) apagarModelo(f);
+  }
 
   function salvar(f: Fase) {
     if (!track) return;
@@ -155,6 +185,19 @@ export default function Trilha() {
                         <Text style={[tipo.subtitulo, { color: c.apoio }]}>Adicionar tarefa</Text>
                       </Pressable>
                     )}
+                    <Separador />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12, paddingVertical: 12, paddingHorizontal: espaco.l }}>
+                      <Pressable accessibilityRole="button" onPress={() => guardarModelo(f)} style={{ minHeight: 32, justifyContent: 'center' }}>
+                        <Text style={[tipo.subtitulo, { color: cor, fontWeight: '600' }]}>
+                          {comModelo.some((m) => m.fase === f) ? 'Atualizar meu modelo' : 'Salvar como meu modelo'}
+                        </Text>
+                      </Pressable>
+                      {comModelo.some((m) => m.fase === f) ? (
+                        <Pressable accessibilityRole="button" onPress={() => voltarAoPadrao(f)} style={{ minHeight: 32, justifyContent: 'center' }}>
+                          <Text style={[tipo.nota, { color: c.apoio }]}>Usar o padrão do Rumo</Text>
+                        </Pressable>
+                      ) : null}
+                    </View>
                   </>
                 ) : null}
                 <Separador />

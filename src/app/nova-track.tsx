@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 
 import { ESTILO, ESTILOS, FASE, FASES, type Estilo, type Fase } from '@/base';
-import { criarTrack } from '@/features/track';
+import { useAoVivo } from '@/data/aoVivo';
+import { consultaFasesComModelo, criarTrack } from '@/features/track';
 import { Botao, BotaoCircular, Destaque, Fala, Rotulo, Tela } from '@/ui/componentes';
 import { Chips, Passos } from '@/ui/estudio';
 import { corDaFase, raio, tipo } from '@/ui/tokens';
@@ -17,6 +18,7 @@ export default function NovaTrack() {
   const [bpm, setBpm] = useState(ESTILO.deep.bpm.padrao);
   const [destino, setDestino] = useState<'pista' | 'streaming'>('pista');
   const [fase, setFase] = useState<Fase>('ideia');
+  const { data: comModelo } = useAoVivo(consultaFasesComModelo());
 
   function trocarEstilo(e: Estilo) {
     setEstilo(e);
@@ -90,8 +92,13 @@ export default function NovaTrack() {
         <Rotulo>Onde ela está</Rotulo>
         <Chips rotulo="Fase atual" opcoes={FASES.map((f) => ({ id: f, nome: FASE[f].nome, cor: corDaFase[f] }))} valor={fase} aoEscolher={setFase} />
         <Text style={[tipo.nota, { color: c.apoio, paddingHorizontal: 4 }]}>
-          {fase === 'ideia' ? 'Começando do zero.' : `As fases antes de ${FASE[fase].nome} entram como feitas. Dá para desmarcar na trilha.`}
+          {fase === 'ideia' ? 'Começando do zero.' : `As fases antes de ${FASE[fase].nome} entram como feitas.`}
         </Text>
+        {comModelo.length > 0 ? (
+          <Text style={[tipo.nota, { color: c.acao, paddingHorizontal: 4 }]}>
+            Usando seus modelos em: {FASES.filter((f) => comModelo.some((m) => m.fase === f)).map((f) => FASE[f].apelido).join(', ')}
+          </Text>
+        ) : null}
       </View>
     </Tela>
   );
