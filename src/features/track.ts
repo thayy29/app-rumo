@@ -16,6 +16,8 @@ export function criarTrack(dados: NovaTrack): string {
   const agora = Date.now();
   const id = novoId();
   const antes = new Set(fasesAntes(dados.fase));
+  // O formulário de criação já responde ao destino: essa tarefa da base entra feita.
+  const respondidas = new Set(['ideia.destino']);
   db.transaction((tx) => {
     tx.insert(track)
       .values({ id, nome: dados.nome.trim() || 'Track sem nome', estilo: dados.estilo, bpm: dados.bpm, destino: dados.destino, faseAtual: dados.fase, criadaEm: agora, escolhidaEm: agora })
@@ -34,7 +36,7 @@ export function criarTrack(dados: NovaTrack): string {
       secao: t.secao ?? null,
       parametro: t.parametro ?? null,
       escolhida: t.escolhida,
-      feitaEm: antes.has(t.fase) && t.escolhida ? agora : null,
+      feitaEm: (antes.has(t.fase) && t.escolhida) || respondidas.has(t.id) ? agora : null,
     }));
     // Em lotes: o SQLite limita a quantidade de parâmetros por comando.
     for (let i = 0; i < linhas.length; i += 20) tx.insert(tarefa).values(linhas.slice(i, i + 20)).run();
