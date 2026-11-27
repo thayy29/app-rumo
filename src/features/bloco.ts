@@ -1,34 +1,41 @@
 import { and, eq, isNull } from 'drizzle-orm';
 
 import { db, schema } from '@/data/db';
+import type { ModoBloco } from '@/data/schema';
 import { limparOndeParei, pausar, restanteMs, retomar } from '@/domain/timer';
+import { atualizarFase } from '@/features/track';
 import { novoId } from '@/platform/id';
 import { agendarFimDoBloco, cancelar } from '@/platform/notificacoes';
 
 // Casos de uso do bloco de foco. Cada ação grava antes da tela mudar (ADR-002).
-// Regras R4 e R5 do plano da fase de testes.
 
-const { bloco, topico } = schema;
+const { bloco, tarefa } = schema;
 
-export const MINUTOS_BLOCO = 25;
-export const MINUTOS_RETOMADA = 10;
+export const MINUTOS: Record<ModoBloco, number> = { completo: 25, feia: 10, retomada: 10 };
 
-// Consulta ao vivo do bloco aberto (no máximo um por vez), com o texto do passo.
+// Consulta ao vivo do bloco aberto (no máximo um por vez), com a tarefa.
 export function consultaBlocoAberto() {
   return db
     .select({
       id: bloco.id,
-      topicoId: bloco.topicoId,
+      trackId: bloco.trackId,
+      tarefaId: bloco.tarefaId,
+      modo: bloco.modo,
       iniciadoEm: bloco.iniciadoEm,
       duracaoMs: bloco.duracaoMs,
       pausadoTotalMs: bloco.pausadoTotalMs,
       pausadoEm: bloco.pausadoEm,
       notificacaoId: bloco.notificacaoId,
-      passo: topico.texto,
-      ondeParei: topico.ondeParei,
+      texto: tarefa.texto,
+      fase: tarefa.fase,
+      prontoQuando: tarefa.prontoQuando,
+      versaoFeia: tarefa.versaoFeia,
+      secao: tarefa.secao,
+      parametro: tarefa.parametro,
+      ondeParei: tarefa.ondeParei,
     })
     .from(bloco)
-    .leftJoin(topico, eq(topico.id, bloco.topicoId))
+    .leftJoin(tarefa, eq(tarefa.id, bloco.tarefaId))
     .where(isNull(bloco.encerradoEm))
     .limit(1);
 }
@@ -37,12 +44,12 @@ export function blocoAberto() {
   return db.select().from(bloco).where(isNull(bloco.encerradoEm)).get();
 }
 
-export async function iniciarBloco(topicoId: string, minutos: number): Promise<void> {
-  if (blocoAberto()) return; // R4: um bloco aberto por vez
+export async function iniciarBloco(entrada: { trackId: string; tarefaId: string; modo: ModoBloco }): Promise<void> {
+  if (blocoAberto()) return; // um bloco aberto por vez
   const agora = Date.now();
-  const duracaoMs = minutos * 60_000;
+  const duracaoMs = MINUTOS[entrada.modo] * 60_000;
   const id = novoId();
-  db.insert(bloco).values({ id, topicoId, iniciadoEm: agora, duracaoMs }).run();
+  db.insert(bloco).values({ id, ...entrada, iniciadoEm: agora, duracaoMs }).run();
   try {
     const notificacaoId = await agendarFimDoBloco(agora + duracaoMs);
     db.update(bloco).set({ notificacaoId }).where(and(eq(bloco.id, id), isNull(bloco.encerradoEm))).run();
@@ -71,7 +78,8 @@ export async function pausarOuRetomar(): Promise<void> {
   }
 }
 
-// R5: fecha o bloco. "Terminei" conclui o passo; "continua" guarda onde a pessoa parou.
+// Fecha o bloco. "Terminei" conclui a tarefa (também na versão feia: feito conta mais que perfeito).
+// Na retomada, "terminei" é o passo de volta; a tarefa continua aberta. "Continua" guarda onde parou.
 export async function fecharBloco(entrada: { resposta: 'terminei' | 'continua'; ondeParei?: string }): Promise<void> {
   const b = blocoAberto();
   if (!b) return;
@@ -79,13 +87,14 @@ export async function fecharBloco(entrada: { resposta: 'terminei' | 'continua'; 
   const nota = limparOndeParei(entrada.ondeParei ?? '');
   db.transaction((tx) => {
     tx.update(bloco).set({ encerradoEm: agora, resposta: entrada.resposta }).where(eq(bloco.id, b.id)).run();
-    if (!b.topicoId) return;
-    if (entrada.resposta === 'terminei') {
-      tx.update(topico).set({ feitoEm: agora, ondeParei: null }).where(eq(topico.id, b.topicoId)).run();
+    if (!b.tarefaId) return;
+    if (entrada.resposta === 'terminei' && b.modo !== 'retomada') {
+      tx.update(tarefa).set({ feitaEm: agora, ondeParei: null }).where(eq(tarefa.id, b.tarefaId)).run();
     } else if (nota) {
-      tx.update(topico).set({ ondeParei: nota }).where(eq(topico.id, b.topicoId)).run();
+      tx.update(tarefa).set({ ondeParei: nota }).where(eq(tarefa.id, b.tarefaId)).run();
     }
   });
+  if (b.trackId) atualizarFase(b.trackId);
   await cancelar(b.notificacaoId).catch(() => undefined);
 }
 

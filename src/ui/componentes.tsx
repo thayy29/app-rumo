@@ -63,11 +63,23 @@ export function Destaque({ children }: { children: ReactNode }) {
   return <Text style={{ color: c.destaqueTinta, fontWeight: '700' }}>{children}</Text>;
 }
 
-export function Fala({ children, expressao = 'neutro', tamanho = 56 }: { children: ReactNode; expressao?: Expressao; tamanho?: number }) {
+export function Fala({
+  children,
+  expressao = 'neutro',
+  tamanho = 56,
+  valor,
+  cor,
+}: {
+  children: ReactNode;
+  expressao?: Expressao;
+  tamanho?: number;
+  valor?: number;
+  cor?: string;
+}) {
   const { s } = useEstilos();
   return (
     <View style={s.falaLinha} accessible accessibilityRole="header">
-      <Mascote tamanho={tamanho} expressao={expressao} />
+      <Mascote tamanho={tamanho} expressao={expressao} valor={valor} cor={cor} />
       <View style={s.balao}>
         <Text style={s.balaoTexto}>{children}</Text>
       </View>
@@ -189,6 +201,8 @@ function criar(c: Cores) {
       borderBottomLeftRadius: 7,
       paddingVertical: 14,
       paddingHorizontal: 17,
+      borderWidth: 1,
+      borderColor: c.separador,
       shadowColor: c.sombra,
       shadowOpacity: 0.07,
       shadowRadius: 12,
@@ -211,11 +225,13 @@ function criar(c: Cores) {
       shadowOffset: { width: 0, height: 2 },
     },
     etapas: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    grupo: { backgroundColor: c.celula, borderRadius: raio.grupo, overflow: 'hidden' },
+    grupo: { backgroundColor: c.celula, borderRadius: raio.grupo, overflow: 'hidden', borderWidth: 1, borderColor: c.separador },
     cartao: {
       backgroundColor: c.celula,
       borderRadius: raio.cartao,
       padding: espaco.l,
+      borderWidth: 1,
+      borderColor: c.separador,
       shadowColor: c.sombra,
       shadowOpacity: 0.05,
       shadowRadius: 14,

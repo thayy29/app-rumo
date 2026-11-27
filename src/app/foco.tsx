@@ -3,12 +3,14 @@ import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 
+import { FASE } from '@/base';
 import { useAoVivo } from '@/data/aoVivo';
 import { acabou, formatar, fracaoCumprida, LIMITE_ONDE_PAREI, restanteMs } from '@/domain/timer';
 import { consultaBlocoAberto, descartarBloco, fecharBloco, pausarOuRetomar } from '@/features/bloco';
 import { confirmar } from '@/platform/confirmar';
 import { Barra, Botao, BotaoCircular, Cartao, Destaque, Fala, Rotulo, Tela } from '@/ui/componentes';
-import { raio, tipo } from '@/ui/tokens';
+import { EtiquetaFase } from '@/ui/estudio';
+import { corDaFase, raio, tipo } from '@/ui/tokens';
 import { useCores } from '@/ui/useCores';
 
 type Fase = 'rodando' | 'fechando' | 'onde-parei';
@@ -48,6 +50,11 @@ export default function Foco() {
   }, [b]);
 
   if (!b) return null;
+
+  // O que fazer neste bloco: o passo de volta (retomada), a versão feia ou a tarefa.
+  const tarefa = b.texto ?? 'Sua tarefa';
+  const passo = b.modo === 'retomada' && b.fase ? FASE[b.fase].retomada : b.modo === 'feia' ? (b.versaoFeia ?? tarefa) : tarefa;
+  const cor = b.fase ? corDaFase[b.fase] : c.acao;
 
   // Seta de voltar (R4): no timer, volta ao Hoje com o bloco rodando; no fechamento, volta uma etapa.
   function voltar() {
@@ -95,15 +102,24 @@ export default function Foco() {
       >
         {topo}
         <View style={{ flex: 1, justifyContent: 'center', gap: 28 }}>
-          <Text style={[tipo.nota, { color: c.apoio, textAlign: 'center', fontWeight: '600' }]}>Agora é só isso</Text>
-          <Text style={[tipo.titulo2, { color: c.texto, textAlign: 'center' }]}>{b.passo ?? 'Seu passo'}</Text>
+          <View style={{ alignItems: 'center', gap: 10 }}>
+            {b.fase ? <EtiquetaFase fase={b.fase} texto={b.modo === 'feia' ? 'Versão feia' : b.modo === 'retomada' ? 'Volta de 10 min' : undefined} /> : null}
+            <Text style={[tipo.titulo2, { color: c.texto, textAlign: 'center' }]}>{passo}</Text>
+            {b.modo === 'feia' ? <Text style={[tipo.subtitulo, { color: c.apoio, textAlign: 'center' }]}>da tarefa: {tarefa}</Text> : null}
+            {b.modo === 'completo' && b.prontoQuando ? (
+              <Text style={[tipo.subtitulo, { color: c.apoio, textAlign: 'center' }]}>
+                <Text style={{ color: cor, fontWeight: '700' }}>Pronto quando: </Text>
+                {b.prontoQuando}
+              </Text>
+            ) : null}
+          </View>
           {b.ondeParei ? (
             <Text style={[tipo.subtitulo, { color: c.apoio, textAlign: 'center' }]}>Você tinha parado em: {b.ondeParei}</Text>
           ) : null}
           <Text
             accessibilityRole="timer"
             accessibilityLabel={`${Math.ceil(restante / 60000)} minutos restantes${pausado ? ', pausado' : ''}`}
-            style={{ fontSize: 76, lineHeight: 84, fontWeight: '700', fontVariant: ['tabular-nums'], color: pausado ? c.apoio : c.texto, textAlign: 'center' }}
+            style={{ fontSize: 76, lineHeight: 84, fontWeight: '700', fontVariant: ['tabular-nums'], color: pausado ? c.apoio : cor, textAlign: 'center' }}
           >
             {formatar(restante)}
           </Text>
@@ -124,7 +140,7 @@ export default function Foco() {
       <Tela
         rodape={
           <>
-            <Botao onPress={terminei}>Terminei esse passo</Botao>
+            <Botao onPress={terminei}>{b.modo === 'retomada' ? 'Fiz o passo de volta' : 'Terminei a tarefa'}</Botao>
             <Botao tipo="texto" onPress={() => setFase('onde-parei')}>
               Ainda não terminei
             </Botao>
@@ -132,14 +148,17 @@ export default function Foco() {
         }
       >
         {topo}
-        <Fala expressao="feliz">
-          {terminouTempo ? 'Bloco feito.' : 'Boa.'} <Destaque>E o passo?</Destaque>
+        <Fala expressao="feliz" cor={cor}>
+          {terminouTempo ? 'Bloco feito.' : 'Boa.'} <Destaque>{b.modo === 'retomada' ? 'Você voltou.' : 'E a tarefa?'}</Destaque>
         </Fala>
         <Cartao estilo={{ gap: 6, paddingVertical: 18 }}>
-          <Text style={[tipo.nota, { color: c.apoio, fontWeight: '600' }]}>Seu passo</Text>
-          <Text style={[tipo.corpoForte, { color: c.texto }]}>{b.passo ?? 'Seu passo'}</Text>
+          <Text style={[tipo.nota, { color: cor, fontWeight: '700' }]}>{b.modo === 'retomada' ? 'Passo de volta' : 'Sua tarefa'}</Text>
+          <Text style={[tipo.corpoForte, { color: c.texto }]}>{passo}</Text>
+          {b.modo === 'completo' && b.prontoQuando ? <Text style={[tipo.subtitulo, { color: c.apoio }]}>Pronto quando: {b.prontoQuando}</Text> : null}
         </Cartao>
-        <Text style={[tipo.subtitulo, { color: c.apoio }]}>Se não terminou, tudo bem: você anota onde parou e volta daí.</Text>
+        <Text style={[tipo.subtitulo, { color: c.apoio }]}>
+          {b.modo === 'retomada' ? 'A tarefa continua no Hoje. Se quiser, anote onde parou.' : 'Se não terminou, tudo bem: você anota onde parou e volta daí.'}
+        </Text>
       </Tela>
     );
   }
@@ -159,7 +178,7 @@ export default function Foco() {
           maxLength={LIMITE_ONDE_PAREI}
           returnKeyType="done"
           onSubmitEditing={salvarOndeParei}
-          placeholder="Ex.: falta o refrão; parei no minuto 12 da aula"
+          placeholder="Ex.: falta o fill antes do DROP 2"
           placeholderTextColor={c.apoio}
           accessibilityLabel="Onde você parou"
           style={[tipo.corpo, { height: 52, borderRadius: raio.celula, backgroundColor: c.celula, color: c.texto, paddingHorizontal: 16 }]}

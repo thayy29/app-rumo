@@ -35,11 +35,13 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.fundo } }}>
         <Stack.Screen name="index" options={{ animation: 'none' }} />
         <Stack.Screen name="inicio" options={{ animation: 'fade' }} />
-        <Stack.Screen name="comecar/estudo" />
-        <Stack.Screen name="comecar/sumario" />
-        <Stack.Screen name="comecar/ate-onde" />
+        <Stack.Screen name="nova-track" />
         <Stack.Screen name="hoje" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="foco" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="trilha" />
+        <Stack.Screen name="automacao" />
+        <Stack.Screen name="mapa" />
+        <Stack.Screen name="tracks" />
       </Stack>
     </>
   );
