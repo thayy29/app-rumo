@@ -30,6 +30,9 @@ describe('andamento da trilha', () => {
     const t = comoEstado('house');
     t.filter((x) => x.fase === 'ideia').forEach((x) => (x.feita = true));
     expect(faseVigente(t, 'ideia')).toBe('loop');
+    t.filter((x) => x.fase !== 'automacao' || x.tipo === 'tarefa').forEach((x) => (x.feita = true));
+    expect(faseVigente(t, 'ideia')).toBe('automacao'); // segura até escolher 3 automações
+    t.filter((x) => x.tipo === 'cardapio').slice(0, 3).forEach((x) => (x.escolhida = true));
     t.forEach((x) => (x.feita = true));
     expect(faseVigente(t, 'ideia')).toBeNull();
     expect(progresso(t, 'ideia')).toBe(1);

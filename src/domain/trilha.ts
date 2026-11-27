@@ -14,7 +14,7 @@ export function montarTrilha(estilo: Estilo): TarefaDaTrilha[] {
 }
 
 // O mínimo que a trilha precisa saber de uma tarefa gravada.
-export type EstadoTarefa = { id: string; fase: Fase; ordem: number; escolhida: boolean; feita: boolean };
+export type EstadoTarefa = { id: string; fase: Fase; ordem: number; escolhida: boolean; feita: boolean; tipo?: string };
 
 export function tarefasAtivas<T extends EstadoTarefa>(tarefas: T[]): T[] {
   return tarefas.filter((t) => t.escolhida).sort((a, b) => FASES.indexOf(a.fase) - FASES.indexOf(b.fase) || a.ordem - b.ordem);
@@ -25,7 +25,9 @@ export function proximaTarefa<T extends EstadoTarefa>(tarefas: T[], fase: Fase):
   return tarefasAtivas(tarefas).find((t) => t.fase === fase && !t.feita);
 }
 
+// A automação só conta como concluída depois de escolher pelo menos 3 itens do cardápio.
 export function faseConcluida(tarefas: EstadoTarefa[], fase: Fase): boolean {
+  if (fase === 'automacao' && tarefas.some((t) => t.tipo === 'cardapio') && faltaEscolherAutomacao(tarefas)) return false;
   return proximaTarefa(tarefas, fase) === undefined;
 }
 
@@ -53,7 +55,7 @@ export function fasesAntes(fase: Fase): Fase[] {
 export const ESCOLHA_AUTOMACAO = { min: 3, max: 6 } as const;
 
 // A fase de automação só anda depois de escolher pelo menos 3 itens do cardápio.
-export function faltaEscolherAutomacao(tarefas: (EstadoTarefa & { tipo: string })[]): boolean {
+export function faltaEscolherAutomacao(tarefas: EstadoTarefa[]): boolean {
   return tarefas.filter((t) => t.tipo === 'cardapio' && t.escolhida).length < ESCOLHA_AUTOMACAO.min;
 }
 
