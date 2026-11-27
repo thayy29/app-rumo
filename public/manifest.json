@@ -4,8 +4,8 @@
   "start_url": "/app-rumo/",
   "scope": "/app-rumo/",
   "display": "standalone",
-  "background_color": "#F7F4EA",
-  "theme_color": "#F7F4EA",
+  "background_color": "#141518",
+  "theme_color": "#141518",
   "lang": "pt-BR",
   "icons": [
     { "src": "/app-rumo/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },

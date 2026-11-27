@@ -1,52 +1,45 @@
-// Tokens do DESIGN.md e do canvas v2 (claro e escuro).
-// Cor literal fora daqui reprova na revisão (ADR-010).
+// Tema de estúdio (ADR-020): escuro sempre, como uma DAW, com uma cor por fase da track.
+// Inspirado no Ableton sem copiar a marca. Cor literal fora daqui reprova na revisão (ADR-010).
+const estudio = {
+  fundo: '#141518',
+  celula: '#1F2126',
+  celula2: '#2A2D33',
+  texto: '#EEF0F2',
+  apoio: '#A5ABB4',
+  linha: 'rgba(255,255,255,0.14)',
+  separador: 'rgba(255,255,255,0.08)',
+  acao: '#FFB547',
+  acaoTexto: '#1A1408',
+  link: '#FFC874',
+  destaque: '#FFB547',
+  destaqueTinta: '#FFC874',
+  tinta: 'rgba(255,181,71,0.14)',
+  selecao: 'rgba(255,181,71,0.12)',
+  halo: 'rgba(255,181,71,0.10)',
+  // Knob, o mascote: um potenciômetro com rosto.
+  mascote: '#2B2E34',
+  mascote2: '#D5D9DF',
+  mascoteOlho: '#17191C',
+  bochecha: 'rgba(255,125,176,0.45)',
+  sombra: '#000000',
+  alerta: '#FF8A6B',
+};
 
-export const cores = {
-  claro: {
-    fundo: '#F7F4EA',
-    celula: '#FFFEFB',
-    texto: '#2A2722',
-    apoio: '#5F584E',
-    linha: 'rgba(42,39,34,0.16)',
-    separador: 'rgba(42,39,34,0.10)',
-    acao: '#4574C5',
-    acaoTexto: '#FFFFFF',
-    link: '#2F59A6',
-    destaque: '#C1D1EB',
-    destaqueTinta: '#2F59A6',
-    tinta: 'rgba(69,116,197,0.11)',
-    selecao: 'rgba(69,116,197,0.10)',
-    halo: 'rgba(118,153,212,0.22)',
-    mascote: '#6C92D6',
-    mascote2: '#4574C5',
-    mascoteOlho: '#1E2740',
-    sombra: '#2A2722',
-    alerta: '#9A4A1E',
-  },
-  escuro: {
-    fundo: '#191719',
-    celula: '#262426',
-    texto: '#F4F1E8',
-    apoio: '#C8C2B8',
-    linha: 'rgba(255,255,255,0.18)',
-    separador: 'rgba(255,255,255,0.10)',
-    acao: '#7699D4',
-    acaoTexto: '#191719',
-    link: '#8FB0E3',
-    destaque: '#C1D1EB',
-    destaqueTinta: '#C1D1EB',
-    tinta: 'rgba(193,209,235,0.14)',
-    selecao: 'rgba(193,209,235,0.12)',
-    halo: 'rgba(118,153,212,0.16)',
-    mascote: '#C1D1EB',
-    mascote2: '#7699D4',
-    mascoteOlho: '#1E2740',
-    sombra: '#000000',
-    alerta: '#E8A27A',
-  },
+export const cores = { estudio } as const;
+
+// Uma cor por fase, como as cores de clip numa DAW: a fase se reconhece pela cor.
+export const corDaFase = {
+  ideia: '#B79CFF',
+  loop: '#6CB8FF',
+  arranjo: '#FFB547',
+  vida: '#FF7DB0',
+  automacao: '#4FD8B5',
+  mix: '#9BDB5C',
+  master: '#FFDE6B',
+  export: '#F2F3F5',
 } as const;
 
-type Paleta = { [K in keyof (typeof cores)['claro']]: string };
+type Paleta = { [K in keyof typeof estudio]: string };
 export type Cores = Paleta;
 
 export const raio = { celula: 14, grupo: 24, cartao: 26, botao: 999 } as const;

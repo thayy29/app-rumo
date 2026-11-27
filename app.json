@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.thayy29.rumo"
@@ -24,8 +24,8 @@
       "output": "single",
       "name": "Rumo",
       "shortName": "Rumo",
-      "themeColor": "#F7F4EA",
-      "backgroundColor": "#F7F4EA"
+      "themeColor": "#141518",
+      "backgroundColor": "#141518"
     },
     "plugins": [
       "expo-router",
