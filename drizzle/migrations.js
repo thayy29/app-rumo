@@ -6,6 +6,7 @@ import m0001 from './0001_detalhes_do_topico.sql';
 import m0002 from './0002_arquivar_estudo.sql';
 import m0003 from './0003_fechar_bloco.sql';
 import m0004 from './0004_v3_tracks.sql';
+import m0005 from './0005_notas_da_fase.sql';
 
   export default {
     journal,
@@ -14,7 +15,8 @@ import m0004 from './0004_v3_tracks.sql';
 m0001,
 m0002,
 m0003,
-m0004
+m0004,
+m0005
     }
   }
   
