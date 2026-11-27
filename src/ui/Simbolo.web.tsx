@@ -11,6 +11,12 @@ const GLIFOS: Record<string, string> = {
   book: '📖',
   laptopcomputer: '💻',
   pencil: '✎',
+  plus: '+',
+  xmark: '×',
+  map: '▦',
+  'slider.horizontal.3': '≡',
+  'music.note.list': '♫',
+  'arrow.uturn.left': '↺',
 };
 
 export function Simbolo({ name, size, tintColor }: { name: NomeSimbolo; size: number; tintColor: string; weight?: string }) {
