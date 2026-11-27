@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { ESTILOS, FASES } from '@/base';
 
@@ -54,6 +54,20 @@ export const bloco = sqliteTable('bloco', {
   encerradoEm: integer('encerrado_em'),
   resposta: text('resposta', { enum: ['terminei', 'continua'] }),
 });
+
+// Observações da fase: o que está difícil nela, para a próxima vez (uma por fase de cada track).
+export const notaDaFase = sqliteTable(
+  'nota_da_fase',
+  {
+    trackId: text('track_id')
+      .notNull()
+      .references(() => track.id, { onDelete: 'cascade' }),
+    fase: text('fase', { enum: FASES }).notNull(),
+    texto: text('texto').notNull(),
+    atualizadaEm: integer('atualizada_em').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.trackId, t.fase] })],
+);
 
 export type Track = typeof track.$inferSelect;
 export type Tarefa = typeof tarefa.$inferSelect;

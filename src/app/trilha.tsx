@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { FASE, FASES, type Fase } from '@/base';
-import { adicionarTarefa, alternarFeita, apagarTarefaPropria } from '@/features/track';
+import { useAoVivo } from '@/data/aoVivo';
+import { adicionarTarefa, alternarFeita, apagarTarefaPropria, consultaNotas, salvarNota } from '@/features/track';
 import { useTrackAtiva } from '@/features/useTrackAtiva';
 import { Grupo, Tela } from '@/ui/componentes';
 import { LinhaTarefa, Separador, Topo } from '@/ui/estudio';
@@ -12,13 +13,15 @@ import { corDaFase, espaco, raio, tipo } from '@/ui/tokens';
 import { useCores } from '@/ui/useCores';
 import { voltarOuHoje } from '@/ui/voltar';
 
-// Trilha (FR-023 e FR-025): todas as fases e tarefas. Marcar, desmarcar e acrescentar as suas.
+// Trilha (FR-023 e FR-025): todas as fases. Só a fase atual é editável; as outras abrem
+// para ver o progresso. Cada fase guarda uma observação sobre o que está difícil.
 export default function Trilha() {
   const c = useCores();
   const { track, tarefas, fase } = useTrackAtiva();
-  const [adicionando, setAdicionando] = useState<Fase | null>(null);
+  const trackId = track?.id ?? '';
+  const { data: notas } = useAoVivo(consultaNotas(trackId), [trackId]);
+  const [adicionando, setAdicionando] = useState(false);
   const [texto, setTexto] = useState('');
-  // Fases já feitas ficam fechadas; um toque no título abre.
   const [abertas, setAbertas] = useState<Set<Fase>>(new Set());
 
   if (!track) return null;
@@ -27,7 +30,7 @@ export default function Trilha() {
     if (!track) return;
     adicionarTarefa(track.id, f, texto);
     setTexto('');
-    setAdicionando(null);
+    setAdicionando(false);
   }
 
   return (
@@ -39,8 +42,9 @@ export default function Trilha() {
         const feitas = daFase.filter((t) => t.feita).length;
         const cardapio = tarefas.filter((t) => t.fase === f && t.tipo === 'cardapio');
         const atual = f === fase;
-        const completa = daFase.length > 0 && feitas === daFase.length && !atual;
-        const aberta = !completa || abertas.has(f);
+        const aberta = atual || abertas.has(f);
+        const nota = notas.find((n) => n.fase === f)?.texto ?? '';
+        const situacao = atual ? 'agora' : FASES.indexOf(f) < FASES.indexOf(fase ?? 'export') || fase === null ? 'feita' : 'depois';
         const alternar = () =>
           setAbertas((a) => {
             const n = new Set(a);
@@ -53,21 +57,29 @@ export default function Trilha() {
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ expanded: aberta }}
-              disabled={!completa}
+              accessibilityHint={atual ? undefined : 'Abre só para ver'}
+              disabled={atual}
               onPress={alternar}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4, minHeight: 32 }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4, minHeight: 36 }}
             >
-              <View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: cor }} />
-              <Text style={[tipo.corpoForte, { color: c.texto, flex: 1 }]}>
+              <View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: cor, opacity: situacao === 'depois' ? 0.4 : 1 }} />
+              <Text style={[tipo.corpoForte, { color: situacao === 'depois' ? c.apoio : c.texto, flex: 1 }]}>
                 {FASE[f].numero}. {FASE[f].apelido} <Text style={[tipo.nota, { color: c.apoio }]}>{FASE[f].nome}</Text>
                 {atual ? <Text style={[tipo.nota, { color: cor }]}> agora</Text> : null}
               </Text>
-              <Text style={[tipo.nota, { color: feitas === daFase.length && daFase.length > 0 ? cor : c.apoio, fontVariant: ['tabular-nums'] }]}>
-                {completa ? (aberta ? 'fechar' : `${feitas}/${daFase.length} ✓`) : `${feitas}/${daFase.length}`}
+              <Text style={[tipo.nota, { color: situacao === 'feita' ? cor : c.apoio, fontVariant: ['tabular-nums'] }]}>
+                {feitas}/{daFase.length}
+                {situacao === 'feita' ? ' ✓' : ''}
+                {!atual ? (aberta ? '  ▴' : '  ▾') : ''}
               </Text>
             </Pressable>
             {aberta ? (
-              <Grupo estilo={atual ? { borderColor: cor } : undefined}>
+              <Grupo estilo={atual ? { borderColor: cor } : { opacity: 0.85 }}>
+                {!atual ? (
+                  <Text style={[tipo.nota, { color: c.apoio, paddingHorizontal: espaco.l, paddingTop: 10 }]}>
+                    Só para ver: edite quando a track estiver nesta fase.
+                  </Text>
+                ) : null}
                 {daFase.map((t, i) => (
                   <View key={t.id}>
                     {i > 0 ? <Separador /> : null}
@@ -76,9 +88,10 @@ export default function Trilha() {
                       detalhe={t.secao ?? t.grupo}
                       feita={t.feita}
                       cor={cor}
+                      somenteLeitura={!atual}
                       aoMarcar={() => alternarFeita(t.id)}
                       direita={
-                        t.baseId === null ? (
+                        atual && t.baseId === null ? (
                           <Pressable accessibilityRole="button" accessibilityLabel={`Apagar ${t.texto}`} hitSlop={10} onPress={() => apagarTarefaPropria(t.id)}>
                             <Simbolo name="xmark" size={14} tintColor={c.apoio} />
                           </Pressable>
@@ -87,7 +100,7 @@ export default function Trilha() {
                     />
                   </View>
                 ))}
-                {cardapio.length > 0 ? (
+                {atual && cardapio.length > 0 ? (
                   <>
                     <Separador />
                     <Pressable
@@ -101,46 +114,90 @@ export default function Trilha() {
                     </Pressable>
                   </>
                 ) : null}
+                {atual ? (
+                  <>
+                    <Separador />
+                    {adicionando ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: espaco.m }}>
+                        <TextInput
+                          value={texto}
+                          onChangeText={setTexto}
+                          autoFocus
+                          maxLength={110}
+                          returnKeyType="done"
+                          onSubmitEditing={() => salvar(f)}
+                          placeholder="Verbo + alvo: ex. gravar o vocal do BREAK"
+                          placeholderTextColor={c.apoio}
+                          accessibilityLabel={`Nova tarefa em ${FASE[f].apelido}`}
+                          style={[
+                            tipo.subtitulo,
+                            { flex: 1, height: 44, borderRadius: raio.celula, backgroundColor: c.celula2, color: c.texto, paddingHorizontal: 12 },
+                          ]}
+                        />
+                        <Pressable
+                          accessibilityRole="button"
+                          onPress={() => salvar(f)}
+                          style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 }}
+                        >
+                          <Text style={[tipo.subtitulo, { color: cor, fontWeight: '700' }]}>Salvar</Text>
+                        </Pressable>
+                      </View>
+                    ) : (
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={() => {
+                          setTexto('');
+                          setAdicionando(true);
+                        }}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: espaco.l }}
+                      >
+                        <Simbolo name="plus" size={15} tintColor={c.apoio} />
+                        <Text style={[tipo.subtitulo, { color: c.apoio }]}>Adicionar tarefa</Text>
+                      </Pressable>
+                    )}
+                  </>
+                ) : null}
                 <Separador />
-                {adicionando === f ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: espaco.m }}>
-                    <TextInput
-                      value={texto}
-                      onChangeText={setTexto}
-                      autoFocus
-                      maxLength={110}
-                      returnKeyType="done"
-                      onSubmitEditing={() => salvar(f)}
-                      placeholder="Verbo + alvo: ex. gravar o vocal do BREAK"
-                      placeholderTextColor={c.apoio}
-                      accessibilityLabel={`Nova tarefa em ${FASE[f].nome}`}
-                      style={[
-                        tipo.subtitulo,
-                        { flex: 1, height: 44, borderRadius: raio.celula, backgroundColor: c.celula2, color: c.texto, paddingHorizontal: 12 },
-                      ]}
-                    />
-                    <Pressable accessibilityRole="button" onPress={() => salvar(f)} style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 }}>
-                      <Text style={[tipo.subtitulo, { color: cor, fontWeight: '700' }]}>Salvar</Text>
-                    </Pressable>
-                  </View>
-                ) : (
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => {
-                      setTexto('');
-                      setAdicionando(f);
-                    }}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: espaco.l }}
-                  >
-                    <Simbolo name="plus" size={15} tintColor={c.apoio} />
-                    <Text style={[tipo.subtitulo, { color: c.apoio }]}>Adicionar tarefa</Text>
-                  </Pressable>
-                )}
+                <Observacao key={`${f}-${nota}`} fase={f} texto={nota} editavel={atual} cor={cor} aoSalvar={(t) => salvarNota(track.id, f, t)} />
               </Grupo>
             ) : null}
           </View>
         );
       })}
     </Tela>
+  );
+}
+
+// O que está difícil nesta fase. Salva ao sair do campo.
+function Observacao({ fase, texto, editavel, cor, aoSalvar }: { fase: Fase; texto: string; editavel: boolean; cor: string; aoSalvar: (t: string) => void }) {
+  const c = useCores();
+  const [valor, setValor] = useState(texto);
+  if (!editavel) {
+    return texto ? (
+      <View style={{ padding: espaco.l, gap: 4 }}>
+        <Text style={[tipo.nota, { color: cor, fontWeight: '700' }]}>Dificuldades</Text>
+        <Text style={[tipo.subtitulo, { color: c.texto }]}>{texto}</Text>
+      </View>
+    ) : null;
+  }
+  return (
+    <View style={{ padding: espaco.l, gap: 6 }}>
+      <Text style={[tipo.nota, { color: cor, fontWeight: '700' }]}>Dificuldades desta fase</Text>
+      <TextInput
+        value={valor}
+        onChangeText={setValor}
+        onBlur={() => valor !== texto && aoSalvar(valor)}
+        multiline
+        maxLength={600}
+        placeholder="O que está travando? Ex.: não sei quando o baixo entra no GROOVE"
+        placeholderTextColor={c.apoio}
+        accessibilityLabel={`Dificuldades em ${FASE[fase].apelido}`}
+        style={[
+          tipo.subtitulo,
+          { minHeight: 72, borderRadius: raio.celula, backgroundColor: c.celula2, color: c.texto, padding: 12, textAlignVertical: 'top' },
+        ]}
+      />
+      <Text style={[tipo.nota, { color: c.apoio }]}>Salva sozinho quando você sai do campo.</Text>
+    </View>
   );
 }

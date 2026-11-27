@@ -7,7 +7,7 @@ import { novoId } from '@/platform/id';
 
 // Casos de uso da track (FR-022 a FR-030). Cada ação grava antes da tela mudar (ADR-002).
 
-const { track, tarefa, bloco } = schema;
+const { track, tarefa, bloco, notaDaFase } = schema;
 
 export type NovaTrack = { nome: string; estilo: Estilo; bpm: number; destino: 'pista' | 'streaming'; fase: Fase };
 
@@ -91,10 +91,19 @@ export function atualizarFase(trackId: string): void {
   }
 }
 
+// Só a fase em que a track está pode ser editada; as outras são para ver o progresso.
+function faseDaTrack(trackId: string): Fase | null {
+  const tarefas = db.select().from(tarefa).where(eq(tarefa.trackId, trackId)).all();
+  return faseVigente(
+    tarefas.map((x) => ({ ...x, feita: x.feitaEm !== null })),
+    FASES[0],
+  );
+}
+
 // FR-025: marcar ou desmarcar uma tarefa à mão, na trilha.
 export function alternarFeita(tarefaId: string): void {
   const t = db.select().from(tarefa).where(eq(tarefa.id, tarefaId)).get();
-  if (!t) return;
+  if (!t || faseDaTrack(t.trackId) !== t.fase) return;
   db.update(tarefa)
     .set({ feitaEm: t.feitaEm === null ? Date.now() : null, ondeParei: null })
     .where(eq(tarefa.id, tarefaId))
@@ -105,7 +114,7 @@ export function alternarFeita(tarefaId: string): void {
 // FR-026: escolher os itens do cardápio de automação.
 export function alternarEscolhida(tarefaId: string): void {
   const t = db.select().from(tarefa).where(eq(tarefa.id, tarefaId)).get();
-  if (!t || t.tipo !== 'cardapio') return;
+  if (!t || t.tipo !== 'cardapio' || faseDaTrack(t.trackId) !== 'automacao') return;
   db.update(tarefa).set({ escolhida: !t.escolhida }).where(eq(tarefa.id, tarefaId)).run();
   atualizarFase(t.trackId);
 }
@@ -138,4 +147,21 @@ export function editarTrack(trackId: string, dados: { nome?: string; bpm?: numbe
 // Quantas tracks já foram terminadas (o G1 do PRD).
 export function consultaTerminadas() {
   return db.select({ id: track.id }).from(track).where(isNotNull(track.terminadaEm));
+}
+
+// Observações da fase: o que está difícil. Texto vazio apaga a nota.
+export function consultaNotas(trackId: string) {
+  return db.select().from(notaDaFase).where(eq(notaDaFase.trackId, trackId));
+}
+
+export function salvarNota(trackId: string, fase: Fase, texto: string): void {
+  const limpo = texto.trim().slice(0, 600);
+  if (!limpo) {
+    db.delete(notaDaFase).where(and(eq(notaDaFase.trackId, trackId), eq(notaDaFase.fase, fase))).run();
+    return;
+  }
+  db.insert(notaDaFase)
+    .values({ trackId, fase, texto: limpo, atualizadaEm: Date.now() })
+    .onConflictDoUpdate({ target: [notaDaFase.trackId, notaDaFase.fase], set: { texto: limpo, atualizadaEm: Date.now() } })
+    .run();
 }
