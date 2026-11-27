@@ -34,3 +34,21 @@ export function formatar(ms: number): string {
   const seg = total % 60;
   return `${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
 }
+
+export function acabou(b: CarimbosDoBloco, agora: number): boolean {
+  return restanteMs(b, agora) === 0;
+}
+
+// Quanto do bloco já foi cumprido, de 0 a 1 (para a barra do Foco).
+export function fracaoCumprida(b: CarimbosDoBloco, agora: number): number {
+  if (b.duracaoMs <= 0) return 1;
+  return 1 - restanteMs(b, agora) / b.duracaoMs;
+}
+
+export const LIMITE_ONDE_PAREI = 120;
+
+// "Onde parei" é uma linha curta; vazio vira nulo para não guardar lixo.
+export function limparOndeParei(texto: string): string | null {
+  const limpo = texto.replace(/\s+/g, ' ').trim().slice(0, LIMITE_ONDE_PAREI);
+  return limpo || null;
+}

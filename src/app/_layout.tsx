@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { useBancoPronto } from '@/data/preparar';
+import { useAtualizacaoWeb } from '@/platform/atualizar';
 import '@/platform/notificacoes';
 import { useCores } from '@/ui/useCores';
 
@@ -10,6 +11,7 @@ export default function RootLayout() {
   const c = useCores();
   // As migrações rodam antes de qualquer tela (ADR-002).
   const { pronto: success, erro: error } = useBancoPronto();
+  useAtualizacaoWeb();
 
   if (error) {
     return (
@@ -37,6 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="comecar/sumario" />
         <Stack.Screen name="comecar/ate-onde" />
         <Stack.Screen name="hoje" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="foco" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
     </>
   );
