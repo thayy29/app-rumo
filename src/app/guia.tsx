@@ -1,8 +1,9 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { FASE, FASES, SECAO, SECOES } from '@/base';
-import { Cartao, Grupo, Tela } from '@/ui/componentes';
+import { Botao, Cartao, Grupo, Tela } from '@/ui/componentes';
 import { Chips, Separador, Topo } from '@/ui/estudio';
 import { corDaFase, espaco, tipo } from '@/ui/tokens';
 import { useCores } from '@/ui/useCores';
@@ -17,7 +18,7 @@ export default function Guia() {
   const [aberta, setAberta] = useState<string | null>(null);
 
   return (
-    <Tela>
+    <Tela rodape={<Botao onPress={() => router.push('/diagnostico')}>Descobrir minha etapa pelo WAV</Botao>}>
       <Topo titulo="Guia" apoio="Onde estou e o que vem depois" aoVoltar={voltarOuHoje} />
       <Chips
         rotulo="Assunto"

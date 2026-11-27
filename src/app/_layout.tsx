@@ -44,6 +44,7 @@ export default function RootLayout() {
         <Stack.Screen name="tracks" />
         <Stack.Screen name="guia" />
         <Stack.Screen name="conquistas" />
+        <Stack.Screen name="diagnostico" />
       </Stack>
     </>
   );

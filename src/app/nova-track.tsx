@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 
@@ -17,7 +17,8 @@ export default function NovaTrack() {
   const [estilo, setEstilo] = useState<Estilo>('deep');
   const [bpm, setBpm] = useState(ESTILO.deep.bpm.padrao);
   const [destino, setDestino] = useState<'pista' | 'streaming'>('pista');
-  const [fase, setFase] = useState<Fase>('ideia');
+  const params = useLocalSearchParams<{ fase?: string }>();
+  const [fase, setFase] = useState<Fase>(() => (FASES.includes(params.fase as Fase) ? (params.fase as Fase) : 'ideia'));
   const { data: comModelo } = useAoVivo(consultaFasesComModelo());
 
   function trocarEstilo(e: Estilo) {
@@ -94,6 +95,9 @@ export default function NovaTrack() {
         <Text style={[tipo.nota, { color: c.apoio, paddingHorizontal: 4 }]}>
           {fase === 'ideia' ? 'Começando do zero.' : `As fases antes de ${FASE[fase].nome} entram como feitas.`}
         </Text>
+        <Botao tipo="texto" onPress={() => router.push('/diagnostico')}>
+          Não sabe? Descobrir pelo WAV
+        </Botao>
         {comModelo.length > 0 ? (
           <Text style={[tipo.nota, { color: c.acao, paddingHorizontal: 4 }]}>
             Usando seus modelos em: {FASES.filter((f) => comModelo.some((m) => m.fase === f)).map((f) => FASE[f].apelido).join(', ')}

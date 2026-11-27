@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, isNotNull, isNull, max } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max } from 'drizzle-orm';
 
-import type { Estilo, Fase } from '@/base';
+import { FASES, type Estilo, type Fase } from '@/base';
 import { db, schema } from '@/data/db';
 import { fasesAntes, faseVigente, trilhaComModelos } from '@/domain/trilha';
 import { novoId } from '@/platform/id';
@@ -207,4 +207,21 @@ export function concluirTrack(trackId: string): { antes: number; depois: number 
   if (!t || t.terminadaEm !== null || faseDaTrack(trackId) !== null) return { antes, depois: antes };
   db.update(track).set({ terminadaEm: Date.now() }).where(eq(track.id, trackId)).run();
   return { antes, depois: antes + 1 };
+}
+
+// O diagnóstico pelo WAV indicou uma fase à frente: as fases anteriores contam como feitas.
+// Nunca volta: as fases passadas são só para ver.
+export function avancarPara(trackId: string, fase: Fase): void {
+  const atual = faseDaTrack(trackId);
+  if (atual === null || FASES.indexOf(fase) <= FASES.indexOf(atual)) return;
+  const agora = Date.now();
+  const antes = fasesAntes(fase);
+  db.transaction((tx) => {
+    tx.update(tarefa)
+      .set({ feitaEm: agora })
+      .where(and(eq(tarefa.trackId, trackId), eq(tarefa.escolhida, true), isNull(tarefa.feitaEm), inArray(tarefa.fase, antes)))
+      .run();
+    tx.update(track).set({ faseAtual: fase }).where(eq(track.id, trackId)).run();
+  });
+  atualizarFase(trackId);
 }
