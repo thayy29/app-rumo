@@ -72,3 +72,15 @@ Registro só de acréscimo. Cada entrada: data, decisão, motivo, origem.
 - **Link colado no meio de um texto não vira tópico.** Motivo: no teste, a URL virou o único tópico. Origem: teste da dona.
 - **Prévia da organização antes de continuar** (dois primeiros módulos e três tópicos de cada). Origem: PM.
 - **Fluxo Produtivo, estudado pelas apostilas (sem inspecionar o app):** a quebra macro/micro é manual sobre um modelo fixo de etapas; para projetos confusos, um agente GPT fora do app devolve o esqueleto. Conclusão: a organização robusta de qualquer conteúdo pede IA; fica como próxima decisão. Origem: análise pedida pela dona.
+
+## 27/11/2026 — v3: Rumo para finalizar tracks
+
+- **Novo foco: terminar tracks de house, deep house e UK garage.** Projeto pessoal e de portfólio; a dona é a primeira usuária; sem meta de renda e sem cobrança. Origem: dona.
+- **Quebra em 8 fases e tarefas de 25 minutos, vinda de uma base de conhecimento, sem IA (ADR-016).** Mais fundo onde a dona trava: arranjo e automação. Base escrita a partir do Guia de Produção Musical dela no Notion. Origem: dona e PM.
+- **"Terminada" = WAV exportado com mix e master básicas.** Lançamento e divulgação ficam fora. Origem: dona.
+- **Nome continua Rumo** (Outro foi descartado: em português lê-se como a palavra comum). **Mascote: Knob.** Origem: dona.
+- **Ableton: locators na v1 (ADR-018), leitura do .als na v2 (ADR-019).** Max for Live fica para depois. Origem: dona, PM.
+- **Estética de estúdio inspirada no Ableton, sem copiar marca (ADR-020).** Origem: dona.
+- **LOOP2TRACK (Max for Live) analisado:** resolve a forma do arranjo em segundos, mas não copia automação, não tem garage nem deep house e para no arranjo. O Rumo cobre vida, automação, mix, master e a sessão. Origem: análise pedida pela dona.
+- **Importação de curso (ADR-014, ADR-015) sai.** O app volta a não fazer requisição de rede. Origem: PM.
+- **O teste de 14 dias com família e amigos cai;** a métrica passa a ser a dona terminar a primeira track em até 30 dias. Origem: dona.
