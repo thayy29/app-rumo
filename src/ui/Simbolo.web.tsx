@@ -18,6 +18,8 @@ const GLIFOS: Record<string, string> = {
   'music.note.list': '♫',
   'arrow.uturn.left': '↺',
   'questionmark.circle': '?',
+  trophy: '🏆',
+  waveform: '〰',
 };
 
 export function Simbolo({ name, size, tintColor }: { name: NomeSimbolo; size: number; tintColor: string; weight?: string }) {
