@@ -17,6 +17,7 @@ const GLIFOS: Record<string, string> = {
   'slider.horizontal.3': '≡',
   'music.note.list': '♫',
   'arrow.uturn.left': '↺',
+  'questionmark.circle': '?',
 };
 
 export function Simbolo({ name, size, tintColor }: { name: NomeSimbolo; size: number; tintColor: string; weight?: string }) {

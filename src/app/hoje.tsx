@@ -24,6 +24,7 @@ export default function Hoje() {
   const trackId = track?.id ?? '';
   const { data: ultimo } = useAoVivo(consultaUltimoBloco(trackId), [trackId]);
   const [pularRetomada, setPularRetomada] = useState(false);
+  const [explicar, setExplicar] = useState(false);
   // Hora da abertura da tela: basta para decidir a retomada (3 dias ou mais sem bloco).
   const [abertoEm] = useState(() => Date.now());
 
@@ -62,7 +63,11 @@ export default function Hoje() {
     <View style={{ flexDirection: 'row', gap: espaco.s }}>
       <Atalho simbolo="list.bullet" texto="Trilha" onPress={() => router.push('/trilha')} />
       <Atalho simbolo="map" texto="Mapa de arranjo" onPress={() => router.push('/mapa')} />
-      {fase === 'automacao' || fase === 'vida' ? <Atalho simbolo="slider.horizontal.3" texto="Automações" onPress={() => router.push('/automacao')} /> : null}
+      {fase === 'automacao' || fase === 'vida' ? (
+        <Atalho simbolo="slider.horizontal.3" texto="Automações" onPress={() => router.push('/automacao')} />
+      ) : (
+        <Atalho simbolo="questionmark.circle" texto="Guia" onPress={() => router.push('/guia')} />
+      )}
     </View>
   );
 
@@ -125,7 +130,11 @@ export default function Hoje() {
 
       {proxima ? (
         <Cartao estilo={{ gap: 14, paddingVertical: 22, paddingHorizontal: 20, borderColor: cor }}>
-          <EtiquetaFase fase={fase} />
+          <Pressable accessibilityRole="button" accessibilityLabel={`O que é ${FASE[fase].apelido}?`} onPress={() => setExplicar((e) => !e)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <EtiquetaFase fase={fase} />
+            <Text style={[tipo.nota, { color: c.apoio }]}>{explicar ? 'fechar' : 'o que é?'}</Text>
+          </Pressable>
+          {explicar ? <Text style={[tipo.subtitulo, { color: c.apoio }]}>{FASE[fase].explicacao}</Text> : null}
           {proxima.grupo || proxima.secao ? (
             <Text style={[tipo.nota, { color: c.apoio, fontWeight: '600' }]}>{[proxima.grupo, proxima.secao].filter(Boolean).join(' · ')}</Text>
           ) : null}
