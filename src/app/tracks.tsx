@@ -22,7 +22,16 @@ export default function Tracks() {
   }
 
   return (
-    <Tela rodape={<Botao onPress={() => router.push('/nova-track')}>Nova track</Botao>}>
+    <Tela
+      rodape={
+        <>
+          <Botao onPress={() => router.push('/nova-track')}>Nova track</Botao>
+          <Botao tipo="texto" onPress={() => router.push('/diagnostico')}>
+            Diagnóstico pelo WAV
+          </Botao>
+        </>
+      }
+    >
       <Topo titulo="Minhas tracks" apoio={terminadas === 1 ? '1 terminada' : `${terminadas} terminadas`} aoVoltar={voltarOuHoje} />
       <Grupo>
         {tracks.map((t, i) => {

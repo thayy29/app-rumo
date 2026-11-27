@@ -18,6 +18,9 @@ export default function Inicio() {
       rodape={
         <>
           <Botao onPress={() => router.push('/nova-track')}>Começar uma track</Botao>
+          <Botao tipo="texto" onPress={() => router.push('/diagnostico')}>
+            Já tenho uma track: onde estou?
+          </Botao>
           <Text style={[tipo.nota, { color: c.apoio, textAlign: 'center', marginTop: 6 }]}>Sem cadastro. Seus dados ficam só no seu celular.</Text>
         </>
       }
