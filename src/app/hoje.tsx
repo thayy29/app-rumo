@@ -112,6 +112,9 @@ export default function Hoje() {
           Trocar de estudo
         </Botao>
       )}
+      {process.env.EXPO_PUBLIC_VERSAO ? (
+        <Text style={[tipo.nota, { color: c.apoio, textAlign: 'center', opacity: 0.6 }]}>versão {process.env.EXPO_PUBLIC_VERSAO}</Text>
+      ) : null}
     </Tela>
   );
 }
