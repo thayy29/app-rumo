@@ -6,7 +6,7 @@ import { ESTILO, FASE } from '@/base';
 import { useAoVivo } from '@/data/aoVivo';
 import { precisaRetomada } from '@/domain/trilha';
 import { consultaBlocoAberto, iniciarBloco, MINUTOS } from '@/features/bloco';
-import { consultaUltimoBloco, existeTrack } from '@/features/track';
+import { consultaNotas, consultaUltimoBloco, existeTrack } from '@/features/track';
 import { useTrackAtiva } from '@/features/useTrackAtiva';
 import type { ModoBloco } from '@/data/schema';
 import { Botao, BotaoCircular, Cartao, Destaque, Fala, Tela } from '@/ui/componentes';
@@ -23,6 +23,7 @@ export default function Hoje() {
   const emAndamento = abertos[0];
   const trackId = track?.id ?? '';
   const { data: ultimo } = useAoVivo(consultaUltimoBloco(trackId), [trackId]);
+  const { data: notas } = useAoVivo(consultaNotas(trackId), [trackId]);
   const [pularRetomada, setPularRetomada] = useState(false);
   const [explicar, setExplicar] = useState(false);
   // Hora da abertura da tela: basta para decidir a retomada (3 dias ou mais sem bloco).
@@ -35,6 +36,7 @@ export default function Hoje() {
   const retomada = !pularRetomada && !!proxima && precisaRetomada(ultimo[0]?.em ?? null, abertoEm);
   const escolher = fase === 'automacao' && !proxima && faltaEscolherAutomacao;
   const dica = fase ? FASE[fase].dicas[track.estilo] : undefined;
+  const dificuldade = notas.find((n) => n.fase === fase)?.texto;
 
   async function comecar(modo: ModoBloco) {
     if (!proxima || !track) return;
@@ -147,6 +149,7 @@ export default function Hoje() {
           {proxima.parametro ? <Linha rotulo="Parâmetro" texto={proxima.parametro} cor={cor} /> : null}
           {proxima.ondeParei ? <Linha rotulo="Você parou em" texto={proxima.ondeParei} cor={cor} /> : null}
           {!retomada && proxima.versaoFeia ? <Linha rotulo="Versão feia" texto={proxima.versaoFeia} cor={c.apoio} /> : null}
+          {dificuldade ? <Linha rotulo="Suas dificuldades nesta fase" texto={dificuldade} cor={c.apoio} /> : null}
         </Cartao>
       ) : null}
 

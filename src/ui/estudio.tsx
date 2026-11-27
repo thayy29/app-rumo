@@ -124,6 +124,7 @@ export function LinhaTarefa({
   aoMarcar,
   marcador = 'check',
   direita,
+  somenteLeitura = false,
 }: {
   texto: string;
   detalhe?: string | null;
@@ -132,6 +133,7 @@ export function LinhaTarefa({
   aoMarcar: () => void;
   marcador?: 'check' | 'escolha';
   direita?: ReactNode;
+  somenteLeitura?: boolean;
 }) {
   const c = useCores();
   const rotulo = marcador === 'escolha' ? (feita ? 'Tirar da track' : 'Escolher para a track') : feita ? 'Desmarcar' : 'Marcar como feita';
@@ -139,9 +141,10 @@ export function LinhaTarefa({
     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: espaco.m, paddingVertical: 12, paddingHorizontal: espaco.l }}>
       <Pressable
         accessibilityRole="checkbox"
-        accessibilityState={{ checked: feita }}
-        accessibilityLabel={`${rotulo}: ${texto}`}
+        accessibilityState={{ checked: feita, disabled: somenteLeitura }}
+        accessibilityLabel={somenteLeitura ? `${feita ? 'Feita' : 'Pendente'}: ${texto}` : `${rotulo}: ${texto}`}
         hitSlop={10}
+        disabled={somenteLeitura}
         onPress={aoMarcar}
         style={{
           width: 26,
@@ -150,6 +153,7 @@ export function LinhaTarefa({
           borderWidth: 2,
           borderColor: feita ? cor : c.linha,
           backgroundColor: feita ? cor : 'transparent',
+          opacity: somenteLeitura ? 0.6 : 1,
           alignItems: 'center',
           justifyContent: 'center',
           marginTop: 1,
