@@ -69,6 +69,22 @@ export const notaDaFase = sqliteTable(
   (t) => [primaryKey({ columns: [t.trackId, t.fase] })],
 );
 
+// Modelo próprio de uma fase: a lista de tarefas que a pessoa salvou para as próximas tracks.
+export const modeloTarefa = sqliteTable('modelo_tarefa', {
+  id: text('id').primaryKey(),
+  fase: text('fase', { enum: FASES }).notNull(),
+  ordem: integer('ordem').notNull(),
+  baseId: text('base_id'),
+  tipo: text('tipo', { enum: ['tarefa', 'cardapio'] }).notNull().default('tarefa'),
+  texto: text('texto').notNull(),
+  prontoQuando: text('pronto_quando'),
+  versaoFeia: text('versao_feia'),
+  grupo: text('grupo'),
+  secao: text('secao'),
+  parametro: text('parametro'),
+  criadoEm: integer('criado_em').notNull(),
+});
+
 export type Track = typeof track.$inferSelect;
 export type Tarefa = typeof tarefa.$inferSelect;
 export type Bloco = typeof bloco.$inferSelect;
