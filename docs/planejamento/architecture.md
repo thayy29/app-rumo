@@ -1,11 +1,11 @@
 # System Architecture: Rumo
 
-**Document Version:** 1.1
-**Date:** 13/11/2026 · atualizado em 25/11/2026 (ADR-014, ADR-015; ADR-003 e ADR-009 parcialmente substituídas)
+**Document Version:** 2.0
+**Date:** 13/11/2026 · atualizado em 25/11/2026 (ADR-014, ADR-015) e em 27/11/2026 (v3: Rumo para finalizar tracks; ADR-016 a ADR-020)
 **Author:** Winston (Architect) · redigido com Claude para Thayana
 **Track:** Quick Flow (arquitetura enxuta, sem backend)
 **Status:** Draft
-**Source PRD:** `bmad-output/prd.md` v1.0 · UX: `DESIGN.md` e `EXPERIENCE.md` v1.0
+**Source PRD:** `bmad-output/prd.md` v3.0 (27/11) · UX: `DESIGN.md` e `EXPERIENCE.md` v1.0
 
 > Fonte única das decisões técnicas transversais. Toda história herda as decisões marcadas como **TRAVADO** aqui.
 > Prioridades pedidas pela dona: **custo zero, desempenho, stack JavaScript moderna e segura.**
@@ -103,8 +103,13 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 | ADR-011 | Distribuição: Expo Go primeiro, com porta de decisão antes das testadoras | Accepted | NFR-009 |
 | ADR-012 | Métricas por registro local de eventos, exportado pela pessoa | Accepted | Success Metrics, NFR-005 |
 | ADR-013 | Qualidade e cadeia de dependências | Accepted | NFR-004, segurança |
-| ADR-014 | Importar o sumário pelo link do curso, de qualquer site (única saída de rede) | Accepted | FR-002, NFR-005, NFR-007 |
-| ADR-015 | Importador de sumário colado com regras testáveis (substitui receitas) | Accepted | FR-002, FR-018, NFR-008 |
+| ADR-014 | Importar o sumário pelo link do curso, de qualquer site (única saída de rede) | Superseded by ADR-016 (27/11) | FR-002, NFR-005, NFR-007 |
+| ADR-015 | Importador de sumário colado com regras testáveis (substitui receitas) | Superseded by ADR-016 (27/11) | FR-002, FR-018, NFR-008 |
+| ADR-016 | Base de conhecimento de produção como dados tipados e testados | Accepted | FR-023, FR-026, FR-029, NFR-008 |
+| ADR-017 | Domínio track → fase → tarefa; trilha montada por função pura | Accepted | FR-022, FR-023, FR-024, FR-025, FR-030 |
+| ADR-018 | Mapa de arranjo calculado; locators criados à mão (integração nível A) | Accepted | FR-027 |
+| ADR-019 | Ler o projeto do Ableton (.als) no aparelho, só leitura (integração nível B) | Proposed (v2) | FR-028, NFR-005 |
+| ADR-020 | Tema de estúdio, cor por fase e mascote Knob | Accepted | NFR-006 |
 
 ### ADR-001: Expo + React Native + TypeScript estrito, só bibliotecas do Expo Go
 
@@ -347,7 +352,7 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 
 ### ADR-014: Importar o sumário pelo link do curso, de qualquer site (única saída de rede)
 
-**Status:** Accepted (25/11/2026)   **Drives:** FR-002, NFR-005, NFR-007   **Altera:** ADR-003 (rede)
+**Status:** Superseded by ADR-016 (27/11/2026)   **Drives:** FR-002, NFR-005, NFR-007   **Altera:** ADR-003 (rede)
 
 **Context:** Colar o sumário inteiro de uma página no celular é trabalhoso; ao copiar a página toda, parágrafos e avisos viravam tópicos (teste da dona com o guia da AI-103). Os guias de estudo de certificação Microsoft seguem a mesma estrutura: seção "Skills measured" / "Habilidades medidas" (h2), áreas com peso na prova (h3), subtemas (h4) e objetivos em lista. A API pública de catálogo da Microsoft começou a ser desativada em junho de 2026 e a nova exige autenticação, o que pediria um servidor.
 
@@ -369,11 +374,65 @@ Regra de dependência (TRAVADO): `app → features → (domain, data, platform)`
 
 ### ADR-015: Importador de sumário colado com regras testáveis (substitui receitas)
 
-**Status:** Accepted (25/11/2026)   **Supersedes:** ADR-009   **Drives:** FR-002, FR-018, NFR-008
+**Status:** Superseded by ADR-016 (27/11/2026)   **Supersedes:** ADR-009   **Drives:** FR-002, FR-018, NFR-008
 
 **Decision:** o texto colado passa por `importarSumario` em `src/domain/sumario.ts`: remove numeração e durações; linhas de módulo (Módulo, Seção, Capítulo, Unidade, Domínio) ou com peso na prova "(25–30%)" viram grupos; ao colar uma página inteira de guia, lê só a seção de habilidades; descarta avisos ("Observação", "Nota") e texto corrido (frases longas terminadas em ponto ou mais de 140 caracteres); limite de 300 linhas. Cada regra tem teste com o caso real que a motivou.
 
 **Consequences — TRAVADO:** nenhuma regra de importação fica em tela; mudança de regra entra com teste.
+
+### Revisão v3 (27/11/2026): Rumo para finalizar tracks
+
+O produto deixou de ser "retomar curso" e passou a ser "terminar tracks de house, deep house e UK garage" (PRD v3). O motor continua: local-first, casos de uso transacionais, bloco por carimbos, onde parei, versão web. Mudam a origem das tarefas e o domínio. A importação de curso (ADR-014, ADR-015) sai das telas e o código sai numa branch própria; com isso o app volta a não fazer nenhuma requisição de rede, e o NFR-005 volta à forma original da ADR-003.
+
+### ADR-016: Base de conhecimento de produção como dados tipados e testados
+
+**Status:** Accepted (27/11/2026)   **Supersedes:** ADR-014, ADR-015 (retoma a ideia da ADR-009)   **Drives:** FR-023, FR-026, FR-029, NFR-008
+
+**Context:** A quebra em macro e micro precisa vir de conhecimento de produção, sem IA. A dona revisa esse conhecimento num documento; o app precisa dos mesmos dados.
+
+**Decision:**
+- A base vive em `src/base/`: `fases.ts` (as 8 fases, ordem, profundidade, cor) e um arquivo por fase com as tarefas. Cada tarefa: `id` estável, `fase`, `texto`, `prontoQuando`, `versaoFeia`, `estilos` (house, deep, garage ou todos), `secao?` (INTRO, BUILD…) e `tipo` (`tarefa` ou `automacao`).
+- TypeScript tipado em vez de JSON + Zod: o compilador já valida a forma e não entra dependência nova (ADR-013). Um teste confere as regras de conteúdo: texto começa com verbo, nada vazio, ids únicos, todo estilo tem ao menos uma tarefa por fase.
+- O documento da base de conhecimento é a fonte; mudar a base = editar o documento e o arquivo no mesmo PR.
+
+**Consequences — TRAVADO:** nenhum texto de tarefa fica em componente; toda tarefa nova entra com o teste passando.
+
+**Alternatives:** IA gerando tarefas (custo, rede, imprevisível); tarefas digitadas pela pessoa (é o problema que o app resolve).
+
+### ADR-017: Domínio track → fase → tarefa; trilha montada por função pura
+
+**Status:** Accepted (27/11/2026)   **Drives:** FR-022 a FR-025, FR-030   **Altera:** seção 5 (modelo de dados)
+
+**Decision:**
+- Tabelas novas, nomes do domínio (ADR-006): `track` (id, nome, estilo, bpm, tom?, destino, fase_atual, criada_em, arquivada_em), `tarefa` (id, track_id, fase, ordem, base_id?, texto, pronto_quando, versao_feia, secao?, escolhida, feita_em, onde_parei), e `bloco` passa a apontar para `tarefa_id`. As fases não são tabela: são a lista fixa de `src/base/fases.ts`.
+- `montarTrilha(estilo)` em `src/domain/trilha.ts` devolve as tarefas da base para o estilo, em ordem. Ao criar a track, o caso de uso copia essas tarefas para o banco: a partir daí elas são da pessoa (editar, pular, acrescentar). `base_id` guarda a origem.
+- Automação: as tarefas do cardápio entram com `escolhida = 0`; a pessoa escolhe de 3 a 6 e só as escolhidas contam no progresso.
+- Progresso = tarefas feitas ÷ tarefas que contam; nunca diminui ao editar (pular conta como resolvida).
+- Migração 0004 cria as tabelas novas e remove `estudo`, `grupo` e `topico`. Os dados atuais são de teste da dona, combinado em 27/11.
+
+**Consequences — TRAVADO:** tela nenhuma lê a base direto para mostrar tarefa de uma track; lê do banco.
+
+### ADR-018: Mapa de arranjo calculado; locators criados à mão (integração nível A)
+
+**Status:** Accepted (27/11/2026)   **Drives:** FR-027
+
+**Decision:** `mapaDeArranjo(estilo, bpm, ajustes?)` em `src/domain/arranjo.ts` devolve as seções com compasso inicial, tamanho em compassos e tempo (minutos = compassos × 4 ÷ BPM). Os tamanhos de partida vêm da base (tabela de estilos). A pessoa cria os locators no Ableton olhando o mapa. Nenhum arquivo é escrito para o Live nesta versão.
+
+**Alternatives:** gerar um `.als` modelo com locators (possível, adiado: formato interno e versões do Live).
+
+### ADR-019: Ler o projeto do Ableton (.als) no aparelho, só leitura (integração nível B)
+
+**Status:** Proposed (v2)   **Drives:** FR-028, NFR-005
+
+**Decision proposta:** o `.als` é XML compactado com gzip. A pessoa compartilha o arquivo; o app descompacta (biblioteca JS pequena, ex.: fflate, a avaliar pela ADR-013) e lê BPM, faixas, locators, fim do arranjo e quantidade de envelopes. Clips com o sufixo "· L2T" (LOOP2TRACK) indicam seções já arranjadas. Função pura `lerProjeto(xml)` com testes em arquivos reais da dona. Nada é escrito nem enviado.
+
+**Revisit when:** a v0.1 estiver em uso e a primeira track terminada.
+
+### ADR-020: Tema de estúdio, cor por fase e mascote Knob
+
+**Status:** Accepted (27/11/2026)   **Drives:** NFR-006, ADR-010
+
+**Decision:** `tokens.ts` ganha o tema "estúdio" escuro como padrão (cinzas planos, sem sombra, um acento quente para a ação principal) e uma cor por fase, como a cor de um clip. O claro continua disponível em Ajustes. O mascote passa a ser o Knob (potenciômetro com rosto, ponteiro como humor), em SVG. Inspiração no espírito do Ableton, sem logo, nome, ícones ou telas copiados. Todo par de cor de texto passa no contraste AA nos dois temas.
 
 ---
 
@@ -557,14 +616,23 @@ src/receitas (JSON) ← usado por domain/comecar
 | FR-015 | FR | Celebração de parada e de chegada | domain/paradaConcluida, app (fullScreenModal) | ADR-007, ADR-010 | Addressed |
 | FR-016 | FR | Ajustes | app/sheet/ajustes, entidade ajustes, platform/arquivos | ADR-002, ADR-003 | Addressed |
 | FR-017 | FR | Contar pra alguém | app/sheet/semana + Share do React Native | ADR-003 | Addressed |
+| FR-022 | FR | Criar uma track (v3) | features/track, app/comecar | ADR-017 | Planned |
+| FR-023 | FR | Trilha gerada da base (v3) | src/base, domain/trilha | ADR-016, ADR-017 | Planned |
+| FR-024 | FR | Dizer onde a track está (v3) | features/track | ADR-017 | Planned |
+| FR-025 | FR | Editar a trilha (v3) | features/track | ADR-017 | Planned |
+| FR-026 | FR | Cardápio de automação (v3) | src/base, tarefa.escolhida | ADR-016, ADR-017 | Planned |
+| FR-027 | FR | Mapa de arranjo e locators (v3) | domain/arranjo | ADR-018 | Planned |
+| FR-028 | FR | Ler o .als (v3, v2 do app) | domain/projeto (futuro) | ADR-019 | Proposed |
+| FR-029 | FR | Versão feia (v3) | tarefa.versao_feia, app/foco | ADR-016 | Planned |
+| FR-030 | FR | Várias tracks, uma ativa (v3) | track.arquivada_em | ADR-017 | Planned |
 | NFR-001 | NFR | Hoje em ≤ 1,0 s (quente) / 2,0 s (frio) | data (leituras indexadas), app/_layout | ADR-001, ADR-002, ADR-004 | Addressed |
 | NFR-002 | NFR | Toque ≤ 100 ms, < 5% quadros perdidos | ui (Reanimated na thread de UI), features (≤ 16 ms) | ADR-004, ADR-010 | Addressed |
 | NFR-003 | NFR | Timer ±1 s, aviso ≤ 5 s | domain (carimbos), platform/notificacoes | ADR-008 | Addressed |
 | NFR-004 | NFR | 0 ações perdidas | features (transação antes do retorno), data (WAL) | ADR-002, ADR-005 | Addressed |
-| NFR-005 | NFR | Nenhum dado da pessoa sai do aparelho; só a página do guia que ela colou é baixada | platform/rede.ts (única porta), sem SDK de terceiros | ADR-003, ADR-012, ADR-013, ADR-014 | Addressed |
+| NFR-005 | NFR | Nada sai do aparelho; zero requisições de rede (v3) | sem cliente HTTP; `.als` lido localmente na v2 | ADR-003, ADR-012, ADR-013, ADR-019 | Addressed |
 | NFR-006 | NFR | Acessibilidade WCAG AA, VoiceOver, AX3 | ui, sheets nativas | ADR-007, ADR-010 | Addressed |
 | NFR-007 | NFR | ≤ 90 s até o primeiro bloco; ≤ 2 toques | app (rotas), ADR de navegação | ADR-007 | Addressed |
-| NFR-008 | NFR | Importação tolerante (sumário colado e guia Microsoft) | src/domain/sumario.ts, src/domain/guiaMicrosoft.ts | ADR-014, ADR-015 | Addressed |
+| NFR-008 | NFR | Base de conhecimento validada | src/base/, teste de conteúdo | ADR-016 | Addressed |
 | NFR-009 | NFR | R$ 0 na validação | Expo Go, EAS Update gratuito | ADR-001, ADR-011 | Partial — depende do spike da opção A |
 
 ### Cobertura por categoria de NFR
