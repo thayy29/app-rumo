@@ -1,5 +1,5 @@
 import { TAREFAS } from '@/base';
-import { faltaEscolherAutomacao, faseVigente, montarTrilha, precisaRetomada, progresso, proximaTarefa } from '@/domain/trilha';
+import { faltaEscolherAutomacao, faseVigente, montarTrilha, precisaRetomada, progresso, proximaTarefa, trilhaComModelos } from '@/domain/trilha';
 
 const comoEstado = (estilo: 'house' | 'deep' | 'garage') => montarTrilha(estilo).map((t) => ({ ...t, feita: false }));
 
@@ -59,5 +59,22 @@ describe('precisaRetomada', () => {
     expect(precisaRetomada(null, 10 * dia)).toBe(false);
     expect(precisaRetomada(0, 2 * dia)).toBe(false);
     expect(precisaRetomada(0, 3 * dia)).toBe(true);
+  });
+});
+
+describe('trilhaComModelos', () => {
+  const meu = { fase: 'loop' as const, tipo: 'tarefa' as const, baseId: null, prontoQuando: null, versaoFeia: null, grupo: null, secao: null, parametro: null };
+  it('troca só a fase que tem modelo e mantém a ordem das fases', () => {
+    const t = trilhaComModelos('house', [
+      { ...meu, texto: 'Meu kick primeiro' },
+      { ...meu, texto: 'Meu baixo depois' },
+    ]);
+    expect(t.filter((x) => x.fase === 'loop').map((x) => x.texto)).toEqual(['Meu kick primeiro', 'Meu baixo depois']);
+    expect(t.filter((x) => x.fase === 'ideia').length).toBeGreaterThan(0);
+    expect(t.map((x) => x.ordem)).toEqual(t.map((_, i) => i));
+  });
+
+  it('sem modelo, é a trilha da base', () => {
+    expect(trilhaComModelos('deep', []).map((x) => x.baseId)).toEqual(montarTrilha('deep').map((x) => x.id));
   });
 });

@@ -13,6 +13,50 @@ export function montarTrilha(estilo: Estilo): TarefaDaTrilha[] {
   }));
 }
 
+// Uma tarefa de modelo próprio: como a da base, mas os campos opcionais podem faltar.
+export type TarefaDeModelo = {
+  fase: Fase;
+  texto: string;
+  tipo: 'tarefa' | 'cardapio';
+  baseId: string | null;
+  prontoQuando: string | null;
+  versaoFeia: string | null;
+  grupo: string | null;
+  secao: string | null;
+  parametro: string | null;
+};
+
+export type ItemDaTrilha = Omit<TarefaDeModelo, 'fase'> & { fase: Fase; ordem: number; escolhida: boolean };
+
+// A trilha da base, trocando cada fase que tem modelo próprio pelas tarefas do modelo.
+export function trilhaComModelos(estilo: Estilo, modelos: TarefaDeModelo[]): ItemDaTrilha[] {
+  const comModelo = new Set(modelos.map((m) => m.fase));
+  const itens: Omit<ItemDaTrilha, 'ordem'>[] = [];
+  for (const f of FASES) {
+    if (comModelo.has(f)) {
+      modelos.filter((m) => m.fase === f).forEach((m) => itens.push({ ...m, escolhida: m.tipo === 'tarefa' }));
+    } else {
+      montarTrilha(estilo)
+        .filter((t) => t.fase === f)
+        .forEach((t) =>
+          itens.push({
+            fase: t.fase,
+            texto: t.texto,
+            tipo: t.tipo,
+            baseId: t.id,
+            prontoQuando: t.prontoQuando,
+            versaoFeia: t.versaoFeia,
+            grupo: t.grupo ?? null,
+            secao: t.secao ?? null,
+            parametro: t.parametro ?? null,
+            escolhida: t.escolhida,
+          }),
+        );
+    }
+  }
+  return itens.map((t, ordem) => ({ ...t, ordem }));
+}
+
 // O mínimo que a trilha precisa saber de uma tarefa gravada.
 export type EstadoTarefa = { id: string; fase: Fase; ordem: number; escolhida: boolean; feita: boolean; tipo?: string };
 
