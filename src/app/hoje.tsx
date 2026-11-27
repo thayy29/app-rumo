@@ -6,7 +6,7 @@ import { ESTILO, FASE } from '@/base';
 import { useAoVivo } from '@/data/aoVivo';
 import { precisaRetomada } from '@/domain/trilha';
 import { consultaBlocoAberto, iniciarBloco, MINUTOS } from '@/features/bloco';
-import { consultaNotas, consultaUltimoBloco, existeTrack } from '@/features/track';
+import { concluirTrack, consultaNotas, consultaUltimoBloco, existeTrack } from '@/features/track';
 import { useTrackAtiva } from '@/features/useTrackAtiva';
 import type { ModoBloco } from '@/data/schema';
 import { Botao, BotaoCircular, Cartao, Destaque, Fala, Tela } from '@/ui/componentes';
@@ -55,6 +55,7 @@ export default function Hoje() {
             {ESTILO[track.estilo].nome} · {track.bpm} BPM · {track.destino === 'pista' ? 'pista' : 'streaming'}
           </Text>
         </View>
+        <BotaoCircular simbolo="trophy" rotulo="Conquistas" onPress={() => router.push('/conquistas')} />
         <BotaoCircular simbolo="music.note.list" rotulo="Minhas tracks" onPress={() => router.push('/tracks')} />
       </View>
       <TiraDeFases atual={fase ?? 'export'} terminada={fase === null} />
@@ -77,15 +78,40 @@ export default function Hoje() {
     <Text style={[tipo.nota, { color: c.apoio, textAlign: 'center', opacity: 0.6 }]}>versão {process.env.EXPO_PUBLIC_VERSAO}</Text>
   ) : null;
 
-  // Track terminada: o WAV existe.
+  // Tudo feito: a pessoa confirma o fim; depois, a track fica como terminada.
   if (fase === null) {
+    const terminada = track.terminadaEm !== null;
+    function concluir() {
+      if (!track) return;
+      const { antes, depois } = concluirTrack(track.id);
+      router.push({ pathname: '/conquistas', params: { antes: String(antes), depois: String(depois) } });
+    }
     return (
-      <Tela rodape={<Botao onPress={() => router.push('/nova-track')}>Começar outra track</Botao>}>
+      <Tela
+        rodape={
+          terminada ? (
+            <>
+              <Botao onPress={() => router.push('/nova-track')}>Começar outra track</Botao>
+              <Botao tipo="texto" onPress={() => router.push('/conquistas')}>
+                Ver conquistas
+              </Botao>
+            </>
+          ) : (
+            <Botao onPress={concluir}>Concluir a track</Botao>
+          )
+        }
+      >
         {cabecalho}
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-          <Fala expressao="feliz" tamanho={72} valor={1}>
-            <Destaque>Track terminada.</Destaque> O WAV existe, e isso é o que conta.
-          </Fala>
+        <View style={{ flex: 1, justifyContent: 'center', gap: 20 }}>
+          {terminada ? (
+            <Fala expressao="feliz" tamanho={72} valor={1}>
+              <Destaque>Track terminada.</Destaque> O WAV existe, e isso é o que conta.
+            </Fala>
+          ) : (
+            <Fala expressao="feliz" tamanho={72} valor={1}>
+              Todas as fases estão feitas. <Destaque>Confirme que a track está terminada</Destaque> para o Knob subir de nível.
+            </Fala>
+          )}
         </View>
         {atalhos}
         {versao}

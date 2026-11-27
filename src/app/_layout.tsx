@@ -43,6 +43,7 @@ export default function RootLayout() {
         <Stack.Screen name="mapa" />
         <Stack.Screen name="tracks" />
         <Stack.Screen name="guia" />
+        <Stack.Screen name="conquistas" />
       </Stack>
     </>
   );

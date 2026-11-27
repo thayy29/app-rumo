@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, isNotNull, isNull, max } from 'drizzle-orm';
 
-import { FASES, type Estilo, type Fase } from '@/base';
+import type { Estilo, Fase } from '@/base';
 import { db, schema } from '@/data/db';
 import { fasesAntes, faseVigente, trilhaComModelos } from '@/domain/trilha';
 import { novoId } from '@/platform/id';
@@ -73,22 +73,24 @@ export function arquivarTrack(trackId: string): void {
 export function atualizarFase(trackId: string): void {
   const t = db.select().from(track).where(eq(track.id, trackId)).get();
   if (!t) return;
-  const tarefas = db.select().from(tarefa).where(eq(tarefa.trackId, trackId)).all();
-  const estado = tarefas.map((x) => ({ ...x, feita: x.feitaEm !== null }));
-  const vigente = faseVigente(estado, FASES[0]);
+  const vigente = faseDaTrack(trackId);
   if (vigente === null) {
-    db.update(track).set({ faseAtual: 'export', terminadaEm: t.terminadaEm ?? Date.now() }).where(eq(track.id, trackId)).run();
+    // Tudo feito: a pessoa confirma o fim com o botão "Concluir a track" (concluirTrack).
+    db.update(track).set({ faseAtual: 'export' }).where(eq(track.id, trackId)).run();
   } else {
     db.update(track).set({ faseAtual: vigente, terminadaEm: null }).where(eq(track.id, trackId)).run();
   }
 }
 
 // Só a fase em que a track está pode ser editada; as outras são para ver o progresso.
+// A fase só anda para a frente: parte da fase gravada na track (criar já adiantada pula as anteriores).
 function faseDaTrack(trackId: string): Fase | null {
+  const t = db.select({ faseAtual: track.faseAtual }).from(track).where(eq(track.id, trackId)).get();
+  if (!t) return null;
   const tarefas = db.select().from(tarefa).where(eq(tarefa.trackId, trackId)).all();
   return faseVigente(
     tarefas.map((x) => ({ ...x, feita: x.feitaEm !== null })),
-    FASES[0],
+    t.faseAtual,
   );
 }
 
@@ -136,9 +138,9 @@ export function editarTrack(trackId: string, dados: { nome?: string; bpm?: numbe
   if (Object.keys(set).length) db.update(track).set(set).where(eq(track.id, trackId)).run();
 }
 
-// Quantas tracks já foram terminadas (o G1 do PRD).
+// Tracks terminadas (o G1 do PRD), para os níveis e o gráfico.
 export function consultaTerminadas() {
-  return db.select({ id: track.id }).from(track).where(isNotNull(track.terminadaEm));
+  return db.select({ id: track.id, nome: track.nome, estilo: track.estilo, terminadaEm: track.terminadaEm }).from(track).where(isNotNull(track.terminadaEm)).orderBy(desc(track.terminadaEm));
 }
 
 // Observações da fase: o que está difícil. Texto vazio apaga a nota.
@@ -195,4 +197,14 @@ export function apagarModelo(fase: Fase): void {
 // Fases que têm modelo próprio.
 export function consultaFasesComModelo() {
   return db.selectDistinct({ fase: modeloTarefa.fase }).from(modeloTarefa);
+}
+
+// A pessoa confirma que a track está terminada, depois de todas as tarefas feitas.
+// Devolve quantas tracks estavam terminadas antes e depois (para a subida de nível).
+export function concluirTrack(trackId: string): { antes: number; depois: number } {
+  const antes = db.select({ id: track.id }).from(track).where(isNotNull(track.terminadaEm)).all().length;
+  const t = db.select().from(track).where(eq(track.id, trackId)).get();
+  if (!t || t.terminadaEm !== null || faseDaTrack(trackId) !== null) return { antes, depois: antes };
+  db.update(track).set({ terminadaEm: Date.now() }).where(eq(track.id, trackId)).run();
+  return { antes, depois: antes + 1 };
 }
