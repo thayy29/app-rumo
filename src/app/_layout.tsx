@@ -37,6 +37,7 @@ export default function RootLayout() {
         <Stack.Screen name="comecar/sumario" />
         <Stack.Screen name="comecar/ate-onde" />
         <Stack.Screen name="hoje" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="foco" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
     </>
   );
