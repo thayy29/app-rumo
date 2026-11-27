@@ -1,4 +1,4 @@
-import { ESTILO, ESTILOS, FASE, FASES, SECOES, TAREFAS } from '@/base';
+import { ESTILO, ESTILOS, FASE, FASES, SECAO, SECOES, TAREFAS } from '@/base';
 
 // Teste de conteúdo (ADR-016): a base é dado, e dado errado quebra a trilha sem erro de tipo.
 describe('base de conhecimento', () => {
@@ -42,6 +42,8 @@ describe('base de conhecimento', () => {
     FASES.forEach((f, i) => {
       expect(FASE[f].numero).toBe(i + 1);
       expect(FASE[f].retomada.trim()).not.toBe('');
+      expect(FASE[f].apelido.trim()).not.toBe('');
+      expect(FASE[f].explicacao.length).toBeGreaterThan(40);
     });
   });
 
@@ -51,6 +53,13 @@ describe('base de conhecimento', () => {
       expect(bpm.min).toBeLessThanOrEqual(bpm.padrao);
       expect(bpm.padrao).toBeLessThanOrEqual(bpm.max);
       SECOES.forEach((s) => expect(mapa[s] % 8).toBe(0));
+    });
+  });
+
+  it('explica todas as seções do arranjo', () => {
+    SECOES.forEach((s) => {
+      expect(SECAO[s].papel.trim()).not.toBe('');
+      expect(SECAO[s].comoReconhecer.trim()).not.toBe('');
     });
   });
 });
