@@ -1,7 +1,6 @@
-import { useColorScheme } from 'react-native';
-
 import { cores, type Cores } from './tokens';
 
+// O estúdio é sempre escuro (ADR-020): a mesma paleta no claro e no escuro do sistema.
 export function useCores(): Cores {
-  return useColorScheme() === 'dark' ? cores.escuro : cores.claro;
+  return cores.estudio;
 }

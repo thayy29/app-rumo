@@ -31,7 +31,7 @@ export default function RootLayout() {
   // Pilha única, sem abas (ADR-007).
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.fundo } }}>
         <Stack.Screen name="index" options={{ animation: 'none' }} />
         <Stack.Screen name="inicio" options={{ animation: 'fade' }} />
