@@ -31,9 +31,17 @@ export type InfoFase = {
   id: Fase;
   numero: number;
   nome: string;
+  apelido: string; // nome de jogo da etapa (gamificação)
   resumo: string;
+  explicacao: string; // o que é a etapa e como saber que você está nela
   retomada: string; // passo de volta de 10 minutos
   dicas: Partial<Record<Estilo, string>>;
+};
+
+export type InfoSecao = {
+  id: Secao;
+  papel: string; // para que serve a seção
+  comoReconhecer: string; // como saber que você está nela
 };
 
 export type InfoEstilo = {

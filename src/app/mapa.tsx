@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import { ESTILO } from '@/base';
+import { ESTILO, SECAO } from '@/base';
 import { mapaDeArranjo, minutosESegundos, type Ajustes } from '@/domain/arranjo';
 import { useTrackAtiva } from '@/features/useTrackAtiva';
 import { Cartao, Grupo, Tela } from '@/ui/componentes';
@@ -56,6 +56,7 @@ export default function Mapa() {
                 <Text style={[tipo.nota, { color: c.apoio }]}>
                   {s.compassos} compassos · {minutosESegundos(s.duracaoSeg)}
                 </Text>
+                <Text style={[tipo.nota, { color: c.texto, marginTop: 2 }]}>{SECAO[s.nome].papel}</Text>
               </View>
               <Text style={[tipo.nota, { color: c.apoio, fontVariant: ['tabular-nums'] }]}>{minutosESegundos(s.inicioSeg)}</Text>
             </View>

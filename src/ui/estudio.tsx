@@ -14,7 +14,7 @@ export function TiraDeFases({ atual, terminada = false }: { atual: Fase; termina
   const c = useCores();
   const i = FASES.indexOf(atual);
   return (
-    <View accessible accessibilityLabel={terminada ? 'Track terminada' : `Fase ${i + 1} de 8: ${FASE[atual].nome}`} style={{ flexDirection: 'row', gap: 4 }}>
+    <View accessible accessibilityLabel={terminada ? 'Track terminada' : `Fase ${i + 1} de 8: ${FASE[atual].apelido}, ${FASE[atual].nome}`} style={{ flexDirection: 'row', gap: 4 }}>
       {FASES.map((f, j) => {
         const feita = terminada || j < i;
         const agora = !terminada && j === i;
@@ -41,7 +41,7 @@ export function EtiquetaFase({ fase, texto }: { fase: Fase; texto?: string }) {
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
       <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: cor }} />
       <Text style={[tipo.nota, { color: cor, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' }]}>
-        {texto ?? `${FASE[fase].numero} · ${FASE[fase].nome}`}
+        {texto ?? `${FASE[fase].numero} · ${FASE[fase].apelido} · ${FASE[fase].nome}`}
       </Text>
     </View>
   );

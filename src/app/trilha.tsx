@@ -59,7 +59,7 @@ export default function Trilha() {
             >
               <View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: cor }} />
               <Text style={[tipo.corpoForte, { color: c.texto, flex: 1 }]}>
-                {FASE[f].numero}. {FASE[f].nome}
+                {FASE[f].numero}. {FASE[f].apelido} <Text style={[tipo.nota, { color: c.apoio }]}>{FASE[f].nome}</Text>
                 {atual ? <Text style={[tipo.nota, { color: cor }]}> agora</Text> : null}
               </Text>
               <Text style={[tipo.nota, { color: feitas === daFase.length && daFase.length > 0 ? cor : c.apoio, fontVariant: ['tabular-nums'] }]}>
